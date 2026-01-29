@@ -17,9 +17,9 @@ import {
 import type { Metadata } from "next";
 
 interface TourPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -32,14 +32,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: TourPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  
   // Clean the ID parameter - extract only the numeric part
-  if (!params.id) {
+  if (!resolvedParams.id) {
     return {
       title: "Тур не найден",
     };
   }
   
-  const cleanId = String(params.id).split(/[\s(]/)[0];
+  const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
   const tour = getTourById(cleanId);
 
   if (!tour) {
@@ -59,13 +61,15 @@ export async function generateMetadata({
   };
 }
 
-export default function TourPage({ params }: TourPageProps) {
+export default async function TourPage({ params }: TourPageProps) {
+  const resolvedParams = await params;
+  
   // Clean the ID parameter - extract only the numeric part
-  if (!params?.id) {
+  if (!resolvedParams?.id) {
     notFound();
   }
   
-  const cleanId = String(params.id).split(/[\s(]/)[0];
+  const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
   const tour = getTourById(cleanId);
 
   if (!tour) {
