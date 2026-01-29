@@ -2,11 +2,11 @@
   "tours": [
     {
       "id": "1",
-      "name": "Istanbul Highlights Tour",
+      "name": "Тур по достопримечательностям Стамбула",
       "slug": "istanbul-highlights-tour",
-      "country": "Turkey",
-      "city": "Istanbul",
-      "duration": "5 days / 4 nights",
+      "country": "Турция",
+      "city": "Стамбул",
+      "duration": "5 дней / 4 ночи",
       "price": 599,
       "currency": "USD",
       "rating": 4.8,
@@ -17,43 +17,43 @@
         "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80",
         "https://images.unsplash.com/photo-1527838832700-5059252407fa?w=800&q=80"
       ],
-      "description": "Experience the magic of Istanbul with our comprehensive 5-day tour. Visit iconic landmarks including the Blue Mosque, Hagia Sophia, and Topkapi Palace. Cruise along the Bosphorus and explore the Grand Bazaar's vibrant atmosphere.",
+      "description": "Испытайте магию Стамбула с нашим комплексным 5-дневным туром. Посетите знаковые достопримечательности, включая Голубую мечеть, Айя-Софию и дворец Топкапы. Совершите круиз по Босфору и исследуйте яркую атмосферу Гранд Базара.",
       "highlights": [
-        "Blue Mosque and Hagia Sophia guided tours",
-        "Topkapi Palace and Harem visit",
-        "Bosphorus cruise with dinner",
-        "Grand Bazaar shopping experience",
-        "Traditional Turkish bath experience"
+        "Экскурсии с гидом по Голубой мечети и Айя-Софии",
+        "Посещение дворца Топкапы и гарема",
+        "Круиз по Босфору с ужином",
+        "Шоппинг на Гранд Базаре",
+        "Традиционная турецкая баня (хаммам)"
       ],
       "included": [
-        "4-star hotel accommodation",
-        "Daily breakfast and 2 dinners",
-        "Airport transfers",
-        "Professional English-speaking guide",
-        "All entrance fees",
-        "Bosphorus cruise"
+        "Проживание в 4-звездочном отеле",
+        "Ежедневный завтрак и 2 ужина",
+        "Трансферы из аэропорта",
+        "Профессиональный гид, говорящий на русском языке",
+        "Все входные билеты",
+        "Круиз по Босфору"
       ],
       "excluded": [
-        "International flights",
-        "Travel insurance",
-        "Personal expenses",
-        "Lunches"
+        "Международные авиабилеты",
+        "Страховка путешествий",
+        "Личные расходы",
+        "Обеды"
       ],
       "hotel": {
         "name": "Istanbul Grand Hotel",
         "rating": 4.5,
-        "amenities": ["Free WiFi", "Swimming Pool", "Spa", "Restaurant", "Gym"]
+        "amenities": ["Бесплатный WiFi", "Бассейн", "Спа", "Ресторан", "Тренажерный зал"]
       },
       "maxGuests": 12,
       "minGuests": 2
     },
     {
       "id": "2",
-      "name": "Cappadocia Hot Air Balloon Adventure",
+      "name": "Приключение на воздушном шаре в Каппадокии",
       "slug": "cappadocia-hot-air-balloon-adventure",
-      "country": "Turkey",
-      "city": "Cappadocia",
-      "duration": "3 days / 2 nights",
+      "country": "Турция",
+      "city": "Каппадокия",
+      "duration": "3 дня / 2 ночи",
       "price": 449,
       "currency": "USD",
       "rating": 4.9,
@@ -64,30 +64,30 @@
         "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&q=80",
         "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=800&q=80"
       ],
-      "description": "Float above the fairy chimneys of Cappadocia in a magical hot air balloon ride at sunrise. Explore ancient underground cities and cave churches in this UNESCO World Heritage site.",
+      "description": "Парите над волшебными дымоходами Каппадокии на воздушном шаре на рассвете. Исследуйте древние подземные города и пещерные церкви в этом объекте Всемирного наследия ЮНЕСКО.",
       "highlights": [
-        "Hot air balloon ride at sunrise",
-        "Göreme Open Air Museum tour",
-        "Underground city exploration",
-        "Pottery workshop in Avanos",
-        "Sunset at Uchisar Castle"
+        "Полет на воздушном шаре на рассвете",
+        "Экскурсия по музею Гёреме под открытым небом",
+        "Исследование подземного города",
+        "Мастер-класс по гончарному делу в Аваносе",
+        "Закат в замке Учхисар"
       ],
       "included": [
-        "Boutique cave hotel accommodation",
-        "Daily breakfast",
-        "Hot air balloon flight with champagne",
-        "Airport transfers",
-        "All entrance fees"
+        "Проживание в бутик-отеле в пещере",
+        "Ежедневный завтрак",
+        "Полет на воздушном шаре с шампанским",
+        "Трансферы из аэропорта",
+        "Все входные билеты"
       ],
       "excluded": [
-        "Flights to Cappadocia",
-        "Lunches and dinners",
-        "Travel insurance"
+        "Авиабилеты в Каппадокию",
+        "Обеды и ужины",
+        "Страховка путешествий"
       ],
       "hotel": {
         "name": "Cappadocia Cave Suites",
         "rating": 4.7,
-        "amenities": ["Free WiFi", "Cave Rooms", "Terrace", "Restaurant"]
+        "amenities": ["Бесплатный WiFi", "Пещерные номера", "Терраса", "Ресторан"]
       },
       "maxGuests": 8,
       "minGuests": 1
@@ -271,11 +271,11 @@
     },
     {
       "id": "7",
-      "name": "Dubai Luxury Experience",
+      "name": "Роскошный отдых в Дубае",
       "slug": "dubai-luxury-experience",
-      "country": "UAE",
-      "city": "Dubai",
-      "duration": "6 days / 5 nights",
+      "country": "ОАЭ",
+      "city": "Дубай",
+      "duration": "6 дней / 5 ночей",
       "price": 1299,
       "currency": "USD",
       "rating": 4.9,
@@ -285,30 +285,30 @@
         "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
         "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
       ],
-      "description": "Experience the height of luxury in Dubai. Visit the Burj Khalifa, shop in world-class malls, enjoy desert safaris, and relax on pristine beaches.",
+      "description": "Испытайте вершину роскоши в Дубае. Посетите Бурдж-Халифу, делайте покупки в торговых центрах мирового класса, наслаждайтесь сафари по пустыне и отдыхайте на безупречных пляжах.",
       "highlights": [
-        "Burj Khalifa At The Top",
-        "Desert safari with dinner",
-        "Dubai Mall and Gold Souk",
-        "Dhow cruise on Dubai Creek",
-        "Palm Jumeirah visit"
+        "Бурдж-Халифа - смотровая площадка At The Top",
+        "Сафари по пустыне с ужином",
+        "Дубай Молл и Золотой рынок",
+        "Круиз на доу по заливу Дубай-Крик",
+        "Посещение острова Пальма Джумейра"
       ],
       "included": [
-        "5-star hotel accommodation",
-        "Daily breakfast",
-        "Airport transfers in luxury car",
-        "All entrance fees",
-        "Desert safari"
+        "Проживание в 5-звездочном отеле",
+        "Ежедневный завтрак",
+        "Трансферы из аэропорта на роскошном автомобиле",
+        "Все входные билеты",
+        "Сафари по пустыне"
       ],
       "excluded": [
-        "International flights",
-        "Lunches and dinners",
-        "Shopping"
+        "Международные авиабилеты",
+        "Обеды и ужины",
+        "Шоппинг"
       ],
       "hotel": {
         "name": "Dubai Marina Luxury Hotel",
         "rating": 4.9,
-        "amenities": ["Infinity Pool", "Private Beach", "Spa", "Fine Dining", "Butler Service"]
+        "amenities": ["Бесконечный бассейн", "Частный пляж", "Спа", "Изысканная кухня", "Услуги дворецкого"]
       },
       "maxGuests": 10,
       "minGuests": 1
