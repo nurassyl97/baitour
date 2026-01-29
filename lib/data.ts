@@ -39,7 +39,10 @@ export function getAllTours(): Tour[] {
 }
 
 export function getTourById(id: string): Tour | undefined {
-  return toursData.tours.find((tour) => tour.id === id) as Tour | undefined;
+  console.log('Looking for tour with ID:', id);
+  const tour = toursData.tours.find((tour) => tour.id === id) as Tour | undefined;
+  console.log('Found tour:', tour ? tour.name : 'NOT FOUND');
+  return tour;
 }
 
 export function getTourBySlug(slug: string): Tour | undefined {
