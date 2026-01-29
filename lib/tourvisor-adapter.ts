@@ -160,17 +160,31 @@ function buildExcluded(tour: TourvisorTour): string[] {
 }
 
 /**
+ * Fix protocol-relative URLs from Tourvisor
+ */
+function fixImageUrl(url: string | undefined): string {
+  if (!url) return '';
+  
+  // If URL starts with //, add https:
+  if (url.startsWith('//')) {
+    return `https:${url}`;
+  }
+  
+  return url;
+}
+
+/**
  * Get hotel image or default
  */
 function getHotelImage(tour: TourvisorTour, hotelDescription?: TourvisorHotelDescription): string {
   // Try hotel description photos first
   if (hotelDescription?.photos && hotelDescription.photos.length > 0) {
-    return hotelDescription.photos[0];
+    return fixImageUrl(hotelDescription.photos[0]);
   }
 
   // Try hotel picture link
   if (tour.hotel.picturelink) {
-    return tour.hotel.picturelink;
+    return fixImageUrl(tour.hotel.picturelink);
   }
 
   // Default image based on country
@@ -191,7 +205,7 @@ function getHotelImage(tour: TourvisorTour, hotelDescription?: TourvisorHotelDes
 function getHotelImages(tour: TourvisorTour, hotelDescription?: TourvisorHotelDescription): string[] {
   // Use description photos if available
   if (hotelDescription?.photos && hotelDescription.photos.length > 0) {
-    return hotelDescription.photos.slice(0, 5);
+    return hotelDescription.photos.slice(0, 5).map(fixImageUrl);
   }
 
   // Otherwise return single image repeated
@@ -277,12 +291,15 @@ export function transformTourvisorTour(
 /**
  * Transform hot tour to our Tour format
  */
-export function transformHotTour(hotTour: TourvisorHotTour): Tour {
+export function transformHotTour(hotTour: TourvisorHotTour, index?: number): Tour {
   const nights = hotTour.nights;
   const oldPrice = hotTour.priceOld || hotTour.price * 1.2;
   
+  // Create unique ID by combining hotel, date, nights, and operator to avoid duplicates
+  const uniqueId = `hot-${hotTour.hotel.id}-${hotTour.date}-${hotTour.nights}n-${hotTour.operator.id}${index !== undefined ? `-${index}` : ''}`;
+  
   return {
-    id: `hot-${hotTour.hotel.id}-${hotTour.date}`,
+    id: uniqueId,
     name: `🔥 ${hotTour.hotel.name} - ${hotTour.country.name}`,
     slug: `hot-${hotTour.hotel.name.toLowerCase().replace(/\s+/g, '-')}-${hotTour.date}`,
     country: hotTour.country.name,
@@ -292,12 +309,12 @@ export function transformHotTour(hotTour: TourvisorHotTour): Tour {
     currency: hotTour.currency,
     rating: hotTour.hotel.rating || (hotTour.hotel.category * 1.6),
     reviewCount: 0,
-    image: hotTour.hotel.picturelink || getHotelImage({ 
+    image: fixImageUrl(hotTour.hotel.picturelink) || getHotelImage({ 
       hotel: hotTour.hotel, 
       country: hotTour.country 
     } as any),
     images: [
-      hotTour.hotel.picturelink || getHotelImage({ 
+      fixImageUrl(hotTour.hotel.picturelink) || getHotelImage({ 
         hotel: hotTour.hotel, 
         country: hotTour.country 
       } as any)
@@ -349,5 +366,5 @@ export function transformTours(
  * Transform array of hot tours
  */
 export function transformHotTours(hotTours: TourvisorHotTour[]): Tour[] {
-  return hotTours.map(transformHotTour);
+  return hotTours.map((tour, index) => transformHotTour(tour, index));
 }
