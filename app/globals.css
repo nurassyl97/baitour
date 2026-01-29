@@ -143,17 +143,31 @@
 
 /* Fix form input colors */
 @layer components {
-  select, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], textarea {
-    @apply text-gray-900 !important;
+  select, 
+  input[type="text"], 
+  input[type="email"], 
+  input[type="tel"], 
+  input[type="date"], 
+  input[type="number"], 
+  textarea {
+    color: oklch(0.145 0 0);
   }
   
   /* Select dropdown styling */
-  [role="combobox"], [role="option"] {
-    @apply text-gray-900 !important;
+  [role="combobox"], 
+  [role="option"],
+  [data-radix-select-viewport] {
+    color: oklch(0.145 0 0);
   }
   
   /* Ensure placeholder is visible */
   ::placeholder {
-    @apply text-gray-400 !important;
+    color: oklch(0.556 0 0);
+    opacity: 0.6;
+  }
+  
+  /* Button text in selects should also be dark */
+  button[role="combobox"] {
+    color: oklch(0.145 0 0);
   }
 }
