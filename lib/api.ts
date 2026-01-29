@@ -14,10 +14,57 @@ const DEFAULT_DEPARTURE_ID = parseInt(process.env.NEXT_PUBLIC_DEFAULT_DEPARTURE_
 // Check if we should use real API or mock data
 const useRealAPI = DATA_SOURCE === 'api' && tourvisorApi.isTourvisorConfigured();
 
+// Cache for country name to ID mapping
+let countryNameToIdCache: Map<string, number> | null = null;
+
+/**
+ * Get country ID by name (supports Russian and English)
+ */
+async function getCountryIdByName(countryName: string): Promise<number | null> {
+  try {
+    // Build cache if not exists
+    if (!countryNameToIdCache) {
+      const countries = await tourvisorApi.getCountries(DEFAULT_DEPARTURE_ID);
+      countryNameToIdCache = new Map();
+      countries.forEach(country => {
+        countryNameToIdCache!.set(country.name.toLowerCase(), country.id);
+      });
+    }
+
+    // Try exact match first
+    const countryId = countryNameToIdCache.get(countryName.toLowerCase());
+    if (countryId) return countryId;
+
+    // Try mapping common English names to Russian
+    const englishToRussian: { [key: string]: string } = {
+      'turkey': 'турция',
+      'uae': 'оаэ',
+      'egypt': 'египет',
+      'maldives': 'мальдивы',
+      'thailand': 'таиланд',
+      'greece': 'греция',
+      'spain': 'испания',
+      'italy': 'италия',
+      'france': 'франция',
+      'cyprus': 'кипр',
+    };
+
+    const russianName = englishToRussian[countryName.toLowerCase()];
+    if (russianName) {
+      return countryNameToIdCache.get(russianName) || null;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Failed to get country ID:', error);
+    return null;
+  }
+}
+
 /**
  * Convert our SearchParams to Tourvisor format
  */
-function convertSearchParamsToTourvisor(params: SearchParams): TourvisorSearchRequest {
+async function convertSearchParamsToTourvisor(params: SearchParams): Promise<TourvisorSearchRequest> {
   // Default search parameters
   const tourvisorParams: TourvisorSearchRequest = {
     departureId: DEFAULT_DEPARTURE_ID,
@@ -30,20 +77,13 @@ function convertSearchParamsToTourvisor(params: SearchParams): TourvisorSearchRe
     currency: 'USD',
   };
 
-  // Map country name to ID (we'll need to get this from API first)
-  // For now, use default countries if not specified
+  // Map country name to ID
   if (params.country) {
-    // This is a simplified mapping - in production, fetch country list from API
-    const countryMap: { [key: string]: number } = {
-      'Турция': 10,
-      'ОАЭ': 15,
-      'Египет': 20,
-      'Мальдивы': 25,
-      'Таиланд': 30,
-    };
-    const countryId = countryMap[params.country];
+    const countryId = await getCountryIdByName(params.country);
     if (countryId) {
       tourvisorParams.countryIds = [countryId];
+    } else {
+      console.warn(`Country "${params.country}" not found in Tourvisor`);
     }
   }
 
@@ -142,8 +182,16 @@ export async function searchTours(
   try {
     console.log('Starting Tourvisor search with params:', params);
 
-    // Convert our params to Tourvisor format
-    const tourvisorParams = convertSearchParamsToTourvisor(params);
+    // Convert our params to Tourvisor format (now async)
+    const tourvisorParams = await convertSearchParamsToTourvisor(params);
+
+    // Check if we have valid country IDs
+    if (!tourvisorParams.countryIds || tourvisorParams.countryIds.length === 0) {
+      console.warn('No valid country selected, falling back to mock data');
+      return mockData.searchTours(params);
+    }
+
+    console.log('Tourvisor search params:', tourvisorParams);
 
     // Start the search
     const searchId = await tourvisorApi.startTourSearch(tourvisorParams);
