@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,22 +21,28 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="border-b bg-gradient-to-r from-primary to-primary/90 shadow-md">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-white hover:text-[#FFC800] transition-colors">
-              <span className="text-white">BAI</span><span className="text-[#FFC800]">tour</span>
+        <nav className="border-b bg-white shadow-md">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+              <Image 
+                src="/logo.png" 
+                alt="BaiTour Logo" 
+                width={60} 
+                height={60}
+                className="object-contain"
+              />
             </Link>
-            <div className="flex gap-6 text-white font-medium">
-              <Link href="/" className="hover:text-[#FFC800] transition-colors">
+            <div className="flex gap-6 text-gray-700 font-medium">
+              <Link href="/" className="hover:text-primary transition-colors">
                 Главная
               </Link>
-              <Link href="/search" className="hover:text-[#FFC800] transition-colors">
+              <Link href="/search" className="hover:text-primary transition-colors">
                 Туры
               </Link>
-              <Link href="/#about" className="hover:text-[#FFC800] transition-colors">
+              <Link href="/#about" className="hover:text-primary transition-colors">
                 О нас
               </Link>
-              <Link href="/#contact" className="hover:text-[#FFC800] transition-colors">
+              <Link href="/#contact" className="hover:text-primary transition-colors">
                 Контакты
               </Link>
             </div>
@@ -48,7 +55,13 @@ export default function RootLayout({
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">BaiTour</h3>
+              <Image 
+                src="/logo.png" 
+                alt="BaiTour Logo" 
+                width={80} 
+                height={80}
+                className="mb-4"
+              />
               <p className="text-gray-400">
                 Ваш надежный партнер для незабываемых путешествий по всему миру.
               </p>
