@@ -140,3 +140,20 @@
     background: linear-gradient(135deg, oklch(0.75 0.15 230) 0%, oklch(0.65 0.12 240) 100%);
   }
 }
+
+/* Fix form input colors */
+@layer components {
+  select, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], textarea {
+    @apply text-gray-900 !important;
+  }
+  
+  /* Select dropdown styling */
+  [role="combobox"], [role="option"] {
+    @apply text-gray-900 !important;
+  }
+  
+  /* Ensure placeholder is visible */
+  ::placeholder {
+    @apply text-gray-400 !important;
+  }
+}
