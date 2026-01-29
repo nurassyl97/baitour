@@ -43,7 +43,9 @@ export function SearchForm() {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="country">Страна</Label>
+          <Label htmlFor="country" className="text-sm font-semibold text-gray-700">
+            Страна
+          </Label>
           <Select value={country} onValueChange={setCountry}>
             <SelectTrigger id="country">
               <SelectValue placeholder="Выберите страну" />
@@ -59,7 +61,9 @@ export function SearchForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city">Город</Label>
+          <Label htmlFor="city" className="text-sm font-semibold text-gray-700">
+            Город
+          </Label>
           <Select value={city} onValueChange={setCity} disabled={!country}>
             <SelectTrigger id="city">
               <SelectValue placeholder="Выберите город" />
@@ -75,18 +79,23 @@ export function SearchForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dates">Даты поездки</Label>
+          <Label htmlFor="dates" className="text-sm font-semibold text-gray-700">
+            Дата поездки
+          </Label>
           <Input
             id="dates"
             type="date"
             value={dates}
             onChange={(e) => setDates(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
+            className="text-gray-900"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="travelers">Путешественники</Label>
+          <Label htmlFor="travelers" className="text-sm font-semibold text-gray-700">
+            Количество человек
+          </Label>
           <Input
             id="travelers"
             type="number"
@@ -94,6 +103,8 @@ export function SearchForm() {
             max="20"
             value={travelers}
             onChange={(e) => setTravelers(e.target.value)}
+            className="text-gray-900"
+            placeholder="2"
           />
         </div>
       </div>
