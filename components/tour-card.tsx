@@ -10,9 +10,11 @@ interface TourCardProps {
 }
 
 export function TourCard({ tour }: TourCardProps) {
+  const tourLink = `/tour/${tour.id}`;
+  
   return (
-    <Link href={`/tour/${tour.id}`}>
-      <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full">
+    <Link href={tourLink} className="block">
+      <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full cursor-pointer">
         <div className="relative h-48 w-full">
           <Image
             src={tour.image}
