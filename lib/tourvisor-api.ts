@@ -24,7 +24,7 @@ import { tourvisorCache } from './tourvisor-cache';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.tourvisor.ru/search/api/v1';
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+const API_KEY = process.env.API_KEY || ''; // Server-side only, not exposed to client
 const DEFAULT_DEPARTURE_ID = parseInt(process.env.NEXT_PUBLIC_DEFAULT_DEPARTURE_ID || '27'); // Almaty
 
 // Sleep helper

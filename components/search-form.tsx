@@ -12,8 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getCountries, getCitiesByCountry } from "@/lib/api";
-
 export function SearchForm() {
   const router = useRouter();
   const [country, setCountry] = useState("");
@@ -31,8 +29,10 @@ export function SearchForm() {
     async function loadCountries() {
       setIsLoadingCountries(true);
       try {
-        const countriesList = await getCountries();
-        setCountries(countriesList);
+        const response = await fetch('/api/countries');
+        if (!response.ok) throw new Error('Failed to load countries');
+        const data = await response.json();
+        setCountries(data.countries || []);
       } catch (error) {
         console.error('Failed to load countries:', error);
       } finally {
@@ -53,8 +53,10 @@ export function SearchForm() {
       setIsLoadingCities(true);
       setCity(""); // Reset city selection
       try {
-        const citiesList = await getCitiesByCountry(country);
-        setCities(citiesList);
+        const response = await fetch(`/api/cities?country=${encodeURIComponent(country)}`);
+        if (!response.ok) throw new Error('Failed to load cities');
+        const data = await response.json();
+        setCities(data.cities || []);
       } catch (error) {
         console.error('Failed to load cities:', error);
         setCities([]);
