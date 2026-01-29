@@ -1,12 +1,12 @@
 import { SearchForm } from "@/components/search-form";
 import { TourCard } from "@/components/tour-card";
-import { getPopularTours } from "@/lib/data";
+import { getPopularTours } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MapPin, Shield, Award, HeadphonesIcon } from "lucide-react";
 
-export default function HomePage() {
-  const popularTours = getPopularTours(6);
+export default async function HomePage() {
+  const popularTours = await getPopularTours(6);
 
   return (
     <div>

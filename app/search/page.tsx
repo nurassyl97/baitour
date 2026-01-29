@@ -3,7 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { TourCard } from "@/components/tour-card";
-import { searchTours, getPriceRange, type SearchParams, type Tour } from "@/lib/data";
+import { searchTours } from "@/lib/api";
+import { getPriceRange, type SearchParams, type Tour } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,29 +15,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { LoadingSpinner, LoadingCard } from "@/components/loading-spinner";
 
 function SearchResults() {
   const searchParams = useSearchParams();
   const [tours, setTours] = useState<Tour[]>([]);
   const [sortBy, setSortBy] = useState<string>("rating");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchProgress, setSearchProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   
   const { min: minPrice, max: maxPrice } = getPriceRange();
 
   useEffect(() => {
-    const country = searchParams.get("country") || undefined;
-    const city = searchParams.get("city") || undefined;
+    async function performSearch() {
+      setIsLoading(true);
+      setError(null);
+      setSearchProgress(0);
 
-    const params: SearchParams = {
-      country,
-      city,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      sortBy: sortBy as any,
-    };
+      const country = searchParams.get("country") || undefined;
+      const city = searchParams.get("city") || undefined;
 
-    const results = searchTours(params);
-    setTours(results);
+      const params: SearchParams = {
+        country,
+        city,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        sortBy: sortBy as any,
+      };
+
+      try {
+        // Pass progress callback to track search progress
+        const results = await searchTours(params, (progress) => {
+          setSearchProgress(progress);
+        });
+        setTours(results);
+        setSearchProgress(100);
+      } catch (err: any) {
+        console.error('Search error:', err);
+        setError(err.message || 'Не удалось выполнить поиск. Попробуйте позже.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    performSearch();
   }, [searchParams, sortBy, priceRange]);
 
   const country = searchParams.get("country");
@@ -67,7 +91,7 @@ function SearchResults() {
             <div className="bg-white rounded-lg shadow p-6 sticky top-4 space-y-6">
               <div>
                 <h3 className="font-semibold mb-4">Сортировка</h3>
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={sortBy} onValueChange={setSortBy} disabled={isLoading}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -93,6 +117,7 @@ function SearchResults() {
                   max={maxPrice}
                   step={50}
                   className="mb-2"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -103,6 +128,7 @@ function SearchResults() {
                   setSortBy("rating");
                   setPriceRange([minPrice, maxPrice]);
                 }}
+                disabled={isLoading}
               >
                 Сбросить фильтры
               </Button>
@@ -111,7 +137,40 @@ function SearchResults() {
 
           {/* Results Grid */}
           <div className="lg:col-span-3">
-            {tours.length === 0 ? (
+            {/* Loading State */}
+            {isLoading && (
+              <div className="text-center py-12">
+                <LoadingSpinner size="lg" />
+                <p className="mt-4 text-lg font-medium">Ищем туры у операторов...</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Это может занять 10-30 секунд
+                </p>
+                {searchProgress > 0 && (
+                  <div className="mt-4 max-w-md mx-auto">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${searchProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">{searchProgress}% завершено</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div className="bg-white rounded-lg shadow p-12 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <p className="text-red-800 font-medium mb-2">Ошибка поиска</p>
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && !error && tours.length === 0 && (
               <div className="bg-white rounded-lg shadow p-12 text-center">
                 <h3 className="text-2xl font-semibold mb-2">Туры не найдены</h3>
                 <p className="text-muted-foreground mb-6">
@@ -121,7 +180,10 @@ function SearchResults() {
                   Вернуться на главную
                 </Button>
               </div>
-            ) : (
+            )}
+
+            {/* Results */}
+            {!isLoading && !error && tours.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {tours.map((tour) => (
                   <TourCard key={tour.id} tour={tour} />
