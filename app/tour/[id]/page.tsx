@@ -33,7 +33,13 @@ export async function generateMetadata({
   params,
 }: TourPageProps): Promise<Metadata> {
   // Clean the ID parameter - extract only the numeric part
-  const cleanId = params.id.toString().split(/[\s(]/)[0];
+  if (!params.id) {
+    return {
+      title: "Тур не найден",
+    };
+  }
+  
+  const cleanId = String(params.id).split(/[\s(]/)[0];
   const tour = getTourById(cleanId);
 
   if (!tour) {
@@ -54,8 +60,12 @@ export async function generateMetadata({
 }
 
 export default function TourPage({ params }: TourPageProps) {
-  // Clean the ID parameter - extract only the numeric part  
-  const cleanId = params.id.toString().split(/[\s(]/)[0];
+  // Clean the ID parameter - extract only the numeric part
+  if (!params?.id) {
+    notFound();
+  }
+  
+  const cleanId = String(params.id).split(/[\s(]/)[0];
   const tour = getTourById(cleanId);
 
   if (!tour) {
