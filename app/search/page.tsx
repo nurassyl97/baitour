@@ -36,10 +36,13 @@ function SearchResults() {
 
       const country = searchParams.get("country") || undefined;
       const city = searchParams.get("city") || undefined;
+      const nightsParam = searchParams.get("nights");
+      const nights = nightsParam ? parseInt(nightsParam) : undefined;
 
       const params: SearchParams = {
         country,
         city,
+        nights,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         sortBy: sortBy as any,

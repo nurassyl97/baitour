@@ -29,6 +29,7 @@ export interface Tour {
 export interface SearchParams {
   country?: string;
   city?: string;
+  nights?: number;
   minPrice?: number;
   maxPrice?: number;
   sortBy?: 'price-asc' | 'price-desc' | 'rating' | 'duration';

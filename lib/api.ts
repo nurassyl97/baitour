@@ -70,12 +70,20 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
     departureId: DEFAULT_DEPARTURE_ID,
     countryIds: [],
     nights: {
-      from: 3,
-      to: 14,
+      from: params.nights || 3,
+      to: params.nights || 14,
     },
     adults: 2,
     currency: 'USD',
   };
+
+  // If specific nights are provided, use narrow range
+  if (params.nights) {
+    tourvisorParams.nights = {
+      from: params.nights,
+      to: params.nights,
+    };
+  }
 
   // Map country name to ID
   if (params.country) {
