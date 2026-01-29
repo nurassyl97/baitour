@@ -20,22 +20,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="border-b bg-white">
+        <nav className="border-b bg-gradient-to-r from-primary to-primary/90 shadow-md">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              BaiTour
+            <Link href="/" className="text-2xl font-bold text-white hover:text-[#FFC800] transition-colors">
+              <span className="text-white">BAI</span><span className="text-[#FFC800]">tour</span>
             </Link>
-            <div className="flex gap-6">
-              <Link href="/" className="hover:text-primary">
+            <div className="flex gap-6 text-white font-medium">
+              <Link href="/" className="hover:text-[#FFC800] transition-colors">
                 Главная
               </Link>
-              <Link href="/search" className="hover:text-primary">
+              <Link href="/search" className="hover:text-[#FFC800] transition-colors">
                 Туры
               </Link>
-              <Link href="/#about" className="hover:text-primary">
+              <Link href="/#about" className="hover:text-[#FFC800] transition-colors">
                 О нас
               </Link>
-              <Link href="/#contact" className="hover:text-primary">
+              <Link href="/#contact" className="hover:text-[#FFC800] transition-colors">
                 Контакты
               </Link>
             </div>

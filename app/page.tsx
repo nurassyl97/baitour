@@ -15,14 +15,14 @@ export default function HomePage() {
         className="relative h-[600px] flex items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&q=80')",
+            "linear-gradient(135deg, rgba(0, 191, 255, 0.95), rgba(28, 181, 224, 0.90)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&q=80')",
         }}
       >
         <div className="container mx-auto px-4 text-center text-white">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Откройте для себя новое приключение
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-lg">
+            Откройте для себя новое <span className="text-[#FFC800]">приключение</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto drop-shadow">
             Исследуйте удивительные туры и впечатления по всему миру с опытными гидами и незабываемыми воспоминаниями
           </p>
           <div className="max-w-4xl mx-auto">
@@ -49,7 +49,9 @@ export default function HomePage() {
 
           <div className="text-center mt-8">
             <Link href="/search">
-              <Button size="lg">Посмотреть все туры</Button>
+              <Button size="lg" className="bg-[#FFC800] hover:bg-[#FFD700] text-gray-900 font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
+                Посмотреть все туры
+              </Button>
             </Link>
           </div>
         </div>
@@ -66,8 +68,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+            <div className="text-center group hover:scale-105 transition-transform">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white mb-4 shadow-lg group-hover:shadow-xl">
                 <MapPin className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">
@@ -78,8 +80,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+            <div className="text-center group hover:scale-105 transition-transform">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFC800] to-[#FFD700] text-gray-900 mb-4 shadow-lg group-hover:shadow-xl">
                 <Award className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Опытные гиды</h3>
@@ -88,8 +90,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+            <div className="text-center group hover:scale-105 transition-transform">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white mb-4 shadow-lg group-hover:shadow-xl">
                 <Shield className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Гарантия лучшей цены</h3>
@@ -98,8 +100,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+            <div className="text-center group hover:scale-105 transition-transform">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFC800] to-[#FFD700] text-gray-900 mb-4 shadow-lg group-hover:shadow-xl">
                 <HeadphonesIcon className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Поддержка 24/7</h3>
