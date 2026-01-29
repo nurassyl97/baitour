@@ -1,0 +1,889 @@
+{
+  "tours": [
+    {
+      "id": "1",
+      "name": "Istanbul Highlights Tour",
+      "slug": "istanbul-highlights-tour",
+      "country": "Turkey",
+      "city": "Istanbul",
+      "duration": "5 days / 4 nights",
+      "price": 599,
+      "currency": "USD",
+      "rating": 4.8,
+      "reviewCount": 234,
+      "image": "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80",
+        "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80",
+        "https://images.unsplash.com/photo-1527838832700-5059252407fa?w=800&q=80"
+      ],
+      "description": "Experience the magic of Istanbul with our comprehensive 5-day tour. Visit iconic landmarks including the Blue Mosque, Hagia Sophia, and Topkapi Palace. Cruise along the Bosphorus and explore the Grand Bazaar's vibrant atmosphere.",
+      "highlights": [
+        "Blue Mosque and Hagia Sophia guided tours",
+        "Topkapi Palace and Harem visit",
+        "Bosphorus cruise with dinner",
+        "Grand Bazaar shopping experience",
+        "Traditional Turkish bath experience"
+      ],
+      "included": [
+        "4-star hotel accommodation",
+        "Daily breakfast and 2 dinners",
+        "Airport transfers",
+        "Professional English-speaking guide",
+        "All entrance fees",
+        "Bosphorus cruise"
+      ],
+      "excluded": [
+        "International flights",
+        "Travel insurance",
+        "Personal expenses",
+        "Lunches"
+      ],
+      "hotel": {
+        "name": "Istanbul Grand Hotel",
+        "rating": 4.5,
+        "amenities": ["Free WiFi", "Swimming Pool", "Spa", "Restaurant", "Gym"]
+      },
+      "maxGuests": 12,
+      "minGuests": 2
+    },
+    {
+      "id": "2",
+      "name": "Cappadocia Hot Air Balloon Adventure",
+      "slug": "cappadocia-hot-air-balloon-adventure",
+      "country": "Turkey",
+      "city": "Cappadocia",
+      "duration": "3 days / 2 nights",
+      "price": 449,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 189,
+      "image": "https://images.unsplash.com/photo-1541445531089-69e8a5c7d7b0?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1541445531089-69e8a5c7d7b0?w=800&q=80",
+        "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&q=80",
+        "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=800&q=80"
+      ],
+      "description": "Float above the fairy chimneys of Cappadocia in a magical hot air balloon ride at sunrise. Explore ancient underground cities and cave churches in this UNESCO World Heritage site.",
+      "highlights": [
+        "Hot air balloon ride at sunrise",
+        "Göreme Open Air Museum tour",
+        "Underground city exploration",
+        "Pottery workshop in Avanos",
+        "Sunset at Uchisar Castle"
+      ],
+      "included": [
+        "Boutique cave hotel accommodation",
+        "Daily breakfast",
+        "Hot air balloon flight with champagne",
+        "Airport transfers",
+        "All entrance fees"
+      ],
+      "excluded": [
+        "Flights to Cappadocia",
+        "Lunches and dinners",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Cappadocia Cave Suites",
+        "rating": 4.7,
+        "amenities": ["Free WiFi", "Cave Rooms", "Terrace", "Restaurant"]
+      },
+      "maxGuests": 8,
+      "minGuests": 1
+    },
+    {
+      "id": "3",
+      "name": "Antalya Beach & Ancient Ruins",
+      "slug": "antalya-beach-ancient-ruins",
+      "country": "Turkey",
+      "city": "Antalya",
+      "duration": "7 days / 6 nights",
+      "price": 699,
+      "currency": "USD",
+      "rating": 4.6,
+      "reviewCount": 156,
+      "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+        "https://images.unsplash.com/photo-1605552085195-1f4d8e0e0e0e?w=800&q=80"
+      ],
+      "description": "Combine beach relaxation with history on Turkey's stunning Mediterranean coast. Visit ancient ruins of Perge and Aspendos, then relax on pristine beaches.",
+      "highlights": [
+        "Ancient ruins of Perge and Aspendos",
+        "Duden Waterfalls",
+        "Old Town Kaleici exploration",
+        "Beach time at Lara Beach",
+        "Boat trip to Kekova"
+      ],
+      "included": [
+        "5-star resort accommodation",
+        "All-inclusive meals",
+        "Airport transfers",
+        "Guided tours",
+        "Water sports access"
+      ],
+      "excluded": [
+        "International flights",
+        "Alcoholic beverages",
+        "Spa treatments"
+      ],
+      "hotel": {
+        "name": "Antalya Beach Resort",
+        "rating": 4.8,
+        "amenities": ["All-Inclusive", "Private Beach", "Pool", "Spa", "Water Sports"]
+      },
+      "maxGuests": 20,
+      "minGuests": 2
+    },
+    {
+      "id": "4",
+      "name": "Paris City of Light Experience",
+      "slug": "paris-city-of-light-experience",
+      "country": "France",
+      "city": "Paris",
+      "duration": "5 days / 4 nights",
+      "price": 899,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 312,
+      "image": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+        "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800&q=80",
+        "https://images.unsplash.com/photo-1549144511-f099e773c147?w=800&q=80"
+      ],
+      "description": "Discover the romance and elegance of Paris. Visit the Eiffel Tower, Louvre Museum, Notre-Dame Cathedral, and stroll along the Champs-Élysées.",
+      "highlights": [
+        "Skip-the-line Eiffel Tower access",
+        "Louvre Museum guided tour",
+        "Seine River cruise",
+        "Montmartre and Sacré-Cœur",
+        "Versailles Palace day trip"
+      ],
+      "included": [
+        "4-star hotel in central Paris",
+        "Daily breakfast",
+        "Metro pass",
+        "Museum skip-the-line tickets",
+        "English-speaking guide"
+      ],
+      "excluded": [
+        "International flights",
+        "Lunches and dinners",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Paris Central Hotel",
+        "rating": 4.4,
+        "amenities": ["Free WiFi", "Breakfast", "Concierge", "Bar"]
+      },
+      "maxGuests": 15,
+      "minGuests": 1
+    },
+    {
+      "id": "5",
+      "name": "Rome Ancient Wonders Tour",
+      "slug": "rome-ancient-wonders-tour",
+      "country": "Italy",
+      "city": "Rome",
+      "duration": "4 days / 3 nights",
+      "price": 749,
+      "currency": "USD",
+      "rating": 4.8,
+      "reviewCount": 267,
+      "image": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80",
+        "https://images.unsplash.com/photo-1529260830199-42c24126f198?w=800&q=80"
+      ],
+      "description": "Walk through ancient history in the Eternal City. Explore the Colosseum, Roman Forum, Vatican Museums, and the Sistine Chapel.",
+      "highlights": [
+        "Colosseum and Roman Forum tour",
+        "Vatican Museums and Sistine Chapel",
+        "St. Peter's Basilica",
+        "Trevi Fountain and Spanish Steps",
+        "Authentic Italian cooking class"
+      ],
+      "included": [
+        "3-star hotel accommodation",
+        "Daily breakfast",
+        "Skip-the-line tickets",
+        "Cooking class",
+        "Professional guide"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Tips"
+      ],
+      "hotel": {
+        "name": "Roma Centro Hotel",
+        "rating": 4.3,
+        "amenities": ["Free WiFi", "Breakfast Room", "Rooftop Terrace"]
+      },
+      "maxGuests": 18,
+      "minGuests": 2
+    },
+    {
+      "id": "6",
+      "name": "Barcelona Gaudi & Beach Tour",
+      "slug": "barcelona-gaudi-beach-tour",
+      "country": "Spain",
+      "city": "Barcelona",
+      "duration": "5 days / 4 nights",
+      "price": 799,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 198,
+      "image": "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80",
+        "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=800&q=80"
+      ],
+      "description": "Experience Barcelona's unique blend of modernist architecture and Mediterranean beaches. Tour Gaudi's masterpieces and enjoy vibrant Catalan culture.",
+      "highlights": [
+        "Sagrada Familia guided tour",
+        "Park Güell visit",
+        "Gothic Quarter walking tour",
+        "La Rambla and La Boqueria Market",
+        "Barceloneta Beach time"
+      ],
+      "included": [
+        "4-star hotel accommodation",
+        "Daily breakfast",
+        "Skip-the-line tickets",
+        "Metro pass",
+        "Tapas tasting tour"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Barcelona Beach Hotel",
+        "rating": 4.5,
+        "amenities": ["Free WiFi", "Pool", "Beach Access", "Restaurant"]
+      },
+      "maxGuests": 16,
+      "minGuests": 1
+    },
+    {
+      "id": "7",
+      "name": "Dubai Luxury Experience",
+      "slug": "dubai-luxury-experience",
+      "country": "UAE",
+      "city": "Dubai",
+      "duration": "6 days / 5 nights",
+      "price": 1299,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 423,
+      "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
+      ],
+      "description": "Experience the height of luxury in Dubai. Visit the Burj Khalifa, shop in world-class malls, enjoy desert safaris, and relax on pristine beaches.",
+      "highlights": [
+        "Burj Khalifa At The Top",
+        "Desert safari with dinner",
+        "Dubai Mall and Gold Souk",
+        "Dhow cruise on Dubai Creek",
+        "Palm Jumeirah visit"
+      ],
+      "included": [
+        "5-star hotel accommodation",
+        "Daily breakfast",
+        "Airport transfers in luxury car",
+        "All entrance fees",
+        "Desert safari"
+      ],
+      "excluded": [
+        "International flights",
+        "Lunches and dinners",
+        "Shopping"
+      ],
+      "hotel": {
+        "name": "Dubai Marina Luxury Hotel",
+        "rating": 4.9,
+        "amenities": ["Infinity Pool", "Private Beach", "Spa", "Fine Dining", "Butler Service"]
+      },
+      "maxGuests": 10,
+      "minGuests": 1
+    },
+    {
+      "id": "8",
+      "name": "Santorini Sunset & Wine Tour",
+      "slug": "santorini-sunset-wine-tour",
+      "country": "Greece",
+      "city": "Santorini",
+      "duration": "4 days / 3 nights",
+      "price": 879,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 289,
+      "image": "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800&q=80",
+        "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&q=80"
+      ],
+      "description": "Experience the breathtaking beauty of Santorini's white-washed villages, stunning sunsets, and world-class wines.",
+      "highlights": [
+        "Oia sunset viewing",
+        "Wine tasting at 3 wineries",
+        "Caldera cruise",
+        "Red Beach visit",
+        "Traditional Greek cooking class"
+      ],
+      "included": [
+        "Boutique hotel with caldera view",
+        "Daily breakfast",
+        "Wine tasting tours",
+        "Sunset cruise",
+        "Cooking class"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "ATV rental"
+      ],
+      "hotel": {
+        "name": "Santorini Caldera Suites",
+        "rating": 4.8,
+        "amenities": ["Infinity Pool", "Caldera View", "Free WiFi", "Breakfast Terrace"]
+      },
+      "maxGuests": 12,
+      "minGuests": 2
+    },
+    {
+      "id": "9",
+      "name": "Amsterdam Canal & Culture Tour",
+      "slug": "amsterdam-canal-culture-tour",
+      "country": "Netherlands",
+      "city": "Amsterdam",
+      "duration": "4 days / 3 nights",
+      "price": 699,
+      "currency": "USD",
+      "rating": 4.6,
+      "reviewCount": 176,
+      "image": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800&q=80",
+        "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800&q=80"
+      ],
+      "description": "Explore Amsterdam's charming canals, world-class museums, and vibrant neighborhoods. Visit the Anne Frank House and Van Gogh Museum.",
+      "highlights": [
+        "Canal cruise",
+        "Anne Frank House visit",
+        "Van Gogh Museum tour",
+        "Bike tour through the city",
+        "Jordaan neighborhood exploration"
+      ],
+      "included": [
+        "3-star canal-side hotel",
+        "Daily breakfast",
+        "Museum tickets",
+        "Bike rental",
+        "Canal cruise"
+      ],
+      "excluded": [
+        "Flights",
+        "Meals",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Amsterdam Canal Hotel",
+        "rating": 4.4,
+        "amenities": ["Canal View", "Free WiFi", "Breakfast Room", "Bikes"]
+      },
+      "maxGuests": 14,
+      "minGuests": 1
+    },
+    {
+      "id": "10",
+      "name": "Prague Medieval Magic",
+      "slug": "prague-medieval-magic",
+      "country": "Czech Republic",
+      "city": "Prague",
+      "duration": "3 days / 2 nights",
+      "price": 499,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 142,
+      "image": "https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80",
+        "https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80"
+      ],
+      "description": "Discover the fairy-tale charm of Prague. Visit Prague Castle, walk across Charles Bridge, and explore the medieval Old Town.",
+      "highlights": [
+        "Prague Castle complex tour",
+        "Charles Bridge at sunrise",
+        "Old Town Square and Astronomical Clock",
+        "Jewish Quarter visit",
+        "Traditional Czech dinner"
+      ],
+      "included": [
+        "3-star hotel in Old Town",
+        "Daily breakfast",
+        "Castle tour",
+        "Welcome dinner",
+        "Walking tours"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches",
+        "Tips"
+      ],
+      "hotel": {
+        "name": "Prague Old Town Hotel",
+        "rating": 4.2,
+        "amenities": ["Free WiFi", "Breakfast", "Central Location"]
+      },
+      "maxGuests": 16,
+      "minGuests": 1
+    },
+    {
+      "id": "11",
+      "name": "Budapest Thermal Baths & History",
+      "slug": "budapest-thermal-baths-history",
+      "country": "Hungary",
+      "city": "Budapest",
+      "duration": "4 days / 3 nights",
+      "price": 549,
+      "currency": "USD",
+      "rating": 4.6,
+      "reviewCount": 128,
+      "image": "https://images.unsplash.com/photo-1541363183101-1f2ab4be2d1a?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1541363183101-1f2ab4be2d1a?w=800&q=80",
+        "https://images.unsplash.com/photo-1559564484-e48eef73225e?w=800&q=80"
+      ],
+      "description": "Relax in Budapest's famous thermal baths and explore the city's stunning architecture along the Danube River.",
+      "highlights": [
+        "Széchenyi Thermal Bath experience",
+        "Buda Castle and Fisherman's Bastion",
+        "Parliament building tour",
+        "Danube River evening cruise",
+        "Ruin bar experience"
+      ],
+      "included": [
+        "3-star hotel accommodation",
+        "Daily breakfast",
+        "Thermal bath tickets",
+        "River cruise",
+        "All entrance fees"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Budapest Danube Hotel",
+        "rating": 4.3,
+        "amenities": ["River View", "Free WiFi", "Breakfast", "Bar"]
+      },
+      "maxGuests": 18,
+      "minGuests": 1
+    },
+    {
+      "id": "12",
+      "name": "Vienna Imperial City Tour",
+      "slug": "vienna-imperial-city-tour",
+      "country": "Austria",
+      "city": "Vienna",
+      "duration": "4 days / 3 nights",
+      "price": 799,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 165,
+      "image": "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&q=80",
+        "https://images.unsplash.com/photo-1609856878074-cf31e21ccb6b?w=800&q=80"
+      ],
+      "description": "Experience Vienna's imperial grandeur, classical music heritage, and famous coffee house culture.",
+      "highlights": [
+        "Schönbrunn Palace tour",
+        "Vienna State Opera performance",
+        "St. Stephen's Cathedral",
+        "Belvedere Palace and gardens",
+        "Traditional Viennese coffee house"
+      ],
+      "included": [
+        "4-star hotel in city center",
+        "Daily breakfast",
+        "Palace tickets",
+        "Opera ticket",
+        "Walking tours"
+      ],
+      "excluded": [
+        "Flights",
+        "Meals",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Vienna Imperial Hotel",
+        "rating": 4.6,
+        "amenities": ["Free WiFi", "Spa", "Restaurant", "Bar"]
+      },
+      "maxGuests": 15,
+      "minGuests": 1
+    },
+    {
+      "id": "13",
+      "name": "Lisbon Coastal Discovery",
+      "slug": "lisbon-coastal-discovery",
+      "country": "Portugal",
+      "city": "Lisbon",
+      "duration": "5 days / 4 nights",
+      "price": 649,
+      "currency": "USD",
+      "rating": 4.8,
+      "reviewCount": 201,
+      "image": "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80",
+        "https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=800&q=80"
+      ],
+      "description": "Discover Lisbon's colorful neighborhoods, historic trams, and stunning coastal views. Day trip to Sintra's palaces included.",
+      "highlights": [
+        "Belém Tower and Jerónimos Monastery",
+        "Alfama district tram ride",
+        "Sintra and Pena Palace day trip",
+        "Fado music dinner show",
+        "Coastal Cascais visit"
+      ],
+      "included": [
+        "3-star hotel in Baixa district",
+        "Daily breakfast",
+        "Sintra day trip",
+        "Fado dinner show",
+        "Tram pass"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches",
+        "Tips"
+      ],
+      "hotel": {
+        "name": "Lisbon Baixa Hotel",
+        "rating": 4.4,
+        "amenities": ["Free WiFi", "Breakfast", "Rooftop Terrace", "Bar"]
+      },
+      "maxGuests": 16,
+      "minGuests": 1
+    },
+    {
+      "id": "14",
+      "name": "Bali Tropical Paradise",
+      "slug": "bali-tropical-paradise",
+      "country": "Indonesia",
+      "city": "Bali",
+      "duration": "7 days / 6 nights",
+      "price": 799,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 356,
+      "image": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
+        "https://images.unsplash.com/photo-1559628376-f3fe5f782a2e?w=800&q=80"
+      ],
+      "description": "Experience Bali's perfect blend of beaches, temples, rice terraces, and wellness. Includes yoga sessions and Balinese spa treatments.",
+      "highlights": [
+        "Tanah Lot sunset temple",
+        "Tegallalang Rice Terraces",
+        "Traditional Balinese spa",
+        "Ubud Monkey Forest",
+        "Beach club experience in Seminyak"
+      ],
+      "included": [
+        "4-star villa accommodation",
+        "Daily breakfast",
+        "Airport transfers",
+        "Spa treatments",
+        "Yoga sessions"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Surfing lessons"
+      ],
+      "hotel": {
+        "name": "Bali Harmony Villa",
+        "rating": 4.7,
+        "amenities": ["Private Pool", "Spa", "Yoga Studio", "Restaurant"]
+      },
+      "maxGuests": 10,
+      "minGuests": 1
+    },
+    {
+      "id": "15",
+      "name": "Tokyo Modern & Traditional",
+      "slug": "tokyo-modern-traditional",
+      "country": "Japan",
+      "city": "Tokyo",
+      "duration": "6 days / 5 nights",
+      "price": 1199,
+      "currency": "USD",
+      "rating": 4.8,
+      "reviewCount": 278,
+      "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80",
+        "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800&q=80"
+      ],
+      "description": "Explore Tokyo's unique blend of ultra-modern technology and ancient traditions. Visit temples, experience sumo, and enjoy world-class cuisine.",
+      "highlights": [
+        "Senso-ji Temple in Asakusa",
+        "Shibuya and Harajuku districts",
+        "Tsukiji Fish Market tour",
+        "Traditional tea ceremony",
+        "Mount Fuji day trip"
+      ],
+      "included": [
+        "4-star hotel in Shinjuku",
+        "Daily breakfast",
+        "JR Pass for trains",
+        "Mount Fuji tour",
+        "Tea ceremony"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Tokyo Central Hotel",
+        "rating": 4.6,
+        "amenities": ["Free WiFi", "Onsen", "Restaurant", "Bar"]
+      },
+      "maxGuests": 14,
+      "minGuests": 1
+    },
+    {
+      "id": "16",
+      "name": "Marrakech Desert Adventure",
+      "slug": "marrakech-desert-adventure",
+      "country": "Morocco",
+      "city": "Marrakech",
+      "duration": "5 days / 4 nights",
+      "price": 699,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 187,
+      "image": "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=800&q=80",
+        "https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?w=800&q=80"
+      ],
+      "description": "Immerse yourself in Marrakech's vibrant souks and experience an overnight desert camp under the stars in the Sahara.",
+      "highlights": [
+        "Jemaa el-Fnaa square experience",
+        "Bahia Palace and Majorelle Garden",
+        "Sahara Desert overnight camp",
+        "Camel trek at sunset",
+        "Traditional Moroccan hammam"
+      ],
+      "included": [
+        "4-star riad accommodation",
+        "Daily breakfast",
+        "Desert camp with dinner",
+        "Camel trek",
+        "Hammam experience"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches",
+        "Tips for guides"
+      ],
+      "hotel": {
+        "name": "Marrakech Traditional Riad",
+        "rating": 4.5,
+        "amenities": ["Rooftop Terrace", "Traditional Architecture", "Pool", "Restaurant"]
+      },
+      "maxGuests": 12,
+      "minGuests": 2
+    },
+    {
+      "id": "17",
+      "name": "Iceland Northern Lights Quest",
+      "slug": "iceland-northern-lights-quest",
+      "country": "Iceland",
+      "city": "Reykjavik",
+      "duration": "5 days / 4 nights",
+      "price": 1099,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 245,
+      "image": "https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=800&q=80",
+        "https://images.unsplash.com/photo-1531168556467-80aace0d0144?w=800&q=80"
+      ],
+      "description": "Chase the Northern Lights and explore Iceland's otherworldly landscapes including waterfalls, geysers, and the Blue Lagoon.",
+      "highlights": [
+        "Northern Lights hunting tour",
+        "Blue Lagoon spa experience",
+        "Golden Circle tour",
+        "Gullfoss and Seljalandsfoss waterfalls",
+        "Geysir geothermal area"
+      ],
+      "included": [
+        "4-star hotel in Reykjavik",
+        "Daily breakfast",
+        "Blue Lagoon admission",
+        "Northern Lights tour",
+        "Golden Circle tour"
+      ],
+      "excluded": [
+        "Flights",
+        "Meals",
+        "Travel insurance"
+      ],
+      "hotel": {
+        "name": "Reykjavik City Hotel",
+        "rating": 4.5,
+        "amenities": ["Free WiFi", "Breakfast", "Bar", "Northern Lights Wake-up Service"]
+      },
+      "maxGuests": 16,
+      "minGuests": 1
+    },
+    {
+      "id": "18",
+      "name": "New York City Highlights",
+      "slug": "new-york-city-highlights",
+      "country": "USA",
+      "city": "New York",
+      "duration": "5 days / 4 nights",
+      "price": 999,
+      "currency": "USD",
+      "rating": 4.6,
+      "reviewCount": 334,
+      "image": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80",
+        "https://images.unsplash.com/photo-1522083165195-3424ed129620?w=800&q=80"
+      ],
+      "description": "Experience the energy of NYC with visits to iconic landmarks including the Statue of Liberty, Times Square, Central Park, and Broadway show.",
+      "highlights": [
+        "Statue of Liberty and Ellis Island",
+        "9/11 Memorial and Museum",
+        "Central Park guided tour",
+        "Broadway show tickets",
+        "Top of the Rock observation deck"
+      ],
+      "included": [
+        "4-star hotel in Midtown",
+        "Daily breakfast",
+        "Broadway show",
+        "All attraction tickets",
+        "NYC MetroCard"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches and dinners",
+        "Shopping"
+      ],
+      "hotel": {
+        "name": "Manhattan Midtown Hotel",
+        "rating": 4.4,
+        "amenities": ["Free WiFi", "Gym", "Business Center", "Breakfast"]
+      },
+      "maxGuests": 20,
+      "minGuests": 1
+    },
+    {
+      "id": "19",
+      "name": "Swiss Alps Adventure",
+      "slug": "swiss-alps-adventure",
+      "country": "Switzerland",
+      "city": "Interlaken",
+      "duration": "6 days / 5 nights",
+      "price": 1299,
+      "currency": "USD",
+      "rating": 4.9,
+      "reviewCount": 216,
+      "image": "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80",
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+      ],
+      "description": "Discover the breathtaking Swiss Alps with visits to Jungfraujoch, scenic train rides, and charming mountain villages.",
+      "highlights": [
+        "Jungfraujoch Top of Europe",
+        "Scenic Bernina Express train",
+        "Lauterbrunnen Valley",
+        "Lake Thun cruise",
+        "Traditional Swiss fondue dinner"
+      ],
+      "included": [
+        "4-star hotel with mountain view",
+        "Daily breakfast",
+        "Swiss Travel Pass",
+        "Jungfraujoch ticket",
+        "Fondue dinner"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches",
+        "Cable car rides (not covered by pass)"
+      ],
+      "hotel": {
+        "name": "Interlaken Alpine Hotel",
+        "rating": 4.7,
+        "amenities": ["Mountain View", "Spa", "Restaurant", "Free WiFi"]
+      },
+      "maxGuests": 14,
+      "minGuests": 1
+    },
+    {
+      "id": "20",
+      "name": "Cairo & Pyramids Explorer",
+      "slug": "cairo-pyramids-explorer",
+      "country": "Egypt",
+      "city": "Cairo",
+      "duration": "5 days / 4 nights",
+      "price": 699,
+      "currency": "USD",
+      "rating": 4.7,
+      "reviewCount": 298,
+      "image": "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80",
+        "https://images.unsplash.com/photo-1553913861-c0fddf2619ee?w=800&q=80"
+      ],
+      "description": "Explore ancient Egypt with visits to the Pyramids of Giza, the Sphinx, Egyptian Museum, and a Nile River cruise.",
+      "highlights": [
+        "Pyramids of Giza and Sphinx",
+        "Egyptian Museum with Tutankhamun treasures",
+        "Khan el-Khalili bazaar",
+        "Nile River dinner cruise",
+        "Saqqara and Memphis day trip"
+      ],
+      "included": [
+        "4-star hotel near pyramids",
+        "Daily breakfast and 2 dinners",
+        "Egyptologist guide",
+        "All entrance fees",
+        "Nile cruise"
+      ],
+      "excluded": [
+        "Flights",
+        "Lunches",
+        "Optional pyramid interior tickets"
+      ],
+      "hotel": {
+        "name": "Cairo Pyramids View Hotel",
+        "rating": 4.5,
+        "amenities": ["Pyramid View", "Pool", "Restaurant", "Free WiFi"]
+      },
+      "maxGuests": 20,
+      "minGuests": 2
+    }
+  ]
+}
