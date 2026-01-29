@@ -43,10 +43,10 @@ export function SearchForm() {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="country">Страна</Label>
           <Select value={country} onValueChange={setCountry}>
             <SelectTrigger id="country">
-              <SelectValue placeholder="Select country" />
+              <SelectValue placeholder="Выберите страну" />
             </SelectTrigger>
             <SelectContent>
               {countries.map((c) => (
@@ -59,10 +59,10 @@ export function SearchForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">Город</Label>
           <Select value={city} onValueChange={setCity} disabled={!country}>
             <SelectTrigger id="city">
-              <SelectValue placeholder="Select city" />
+              <SelectValue placeholder="Выберите город" />
             </SelectTrigger>
             <SelectContent>
               {cities.map((c) => (
@@ -75,7 +75,7 @@ export function SearchForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dates">Travel Dates</Label>
+          <Label htmlFor="dates">Даты поездки</Label>
           <Input
             id="dates"
             type="date"
@@ -86,7 +86,7 @@ export function SearchForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="travelers">Travelers</Label>
+          <Label htmlFor="travelers">Путешественники</Label>
           <Input
             id="travelers"
             type="number"
@@ -99,7 +99,7 @@ export function SearchForm() {
       </div>
 
       <Button type="submit" className="w-full" size="lg">
-        Search Tours
+        Поиск туров
       </Button>
     </form>
   );

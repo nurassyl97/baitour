@@ -41,7 +41,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${tour.name} - ${tour.city}, ${tour.country} | TravelTours`,
+    title: `${tour.name} - ${tour.city}, ${tour.country} | BaiTour`,
     description: tour.description,
     openGraph: {
       title: tour.name,
@@ -125,7 +125,7 @@ export default function TourPage({ params }: TourPageProps) {
               {/* Description */}
               <Card>
                 <CardHeader>
-                  <CardTitle>About This Tour</CardTitle>
+                  <CardTitle>О туре</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-lg leading-relaxed">{tour.description}</p>
@@ -135,7 +135,7 @@ export default function TourPage({ params }: TourPageProps) {
               {/* Highlights */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Tour Highlights</CardTitle>
+                  <CardTitle>Основные моменты тура</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
@@ -154,7 +154,7 @@ export default function TourPage({ params }: TourPageProps) {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-green-600">
-                      What's Included
+                      Что включено
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -172,7 +172,7 @@ export default function TourPage({ params }: TourPageProps) {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-red-600">
-                      What's Not Included
+                      Что не включено
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -193,7 +193,7 @@ export default function TourPage({ params }: TourPageProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Hotel className="h-5 w-5 mr-2" />
-                    Accommodation
+                    Размещение
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -224,26 +224,26 @@ export default function TourPage({ params }: TourPageProps) {
                       <span className="text-4xl font-bold">
                         ${tour.price}
                       </span>
-                      <span className="text-muted-foreground">per person</span>
+                      <span className="text-muted-foreground">за человека</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      * Price may vary based on season and availability
+                      * Цена может меняться в зависимости от сезона и наличия мест
                     </p>
                   </div>
 
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Duration</span>
+                      <span className="text-muted-foreground">Продолжительность</span>
                       <span className="font-semibold">{tour.duration}</span>
                     </div>
                     <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Group Size</span>
+                      <span className="text-muted-foreground">Размер группы</span>
                       <span className="font-semibold">
-                        {tour.minGuests}-{tour.maxGuests} people
+                        {tour.minGuests}-{tour.maxGuests} человек
                       </span>
                     </div>
                     <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Rating</span>
+                      <span className="text-muted-foreground">Рейтинг</span>
                       <span className="font-semibold flex items-center">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                         {tour.rating} ({tour.reviewCount})
@@ -253,12 +253,12 @@ export default function TourPage({ params }: TourPageProps) {
 
                   <Link href={`/booking?tourId=${tour.id}`}>
                     <Button size="lg" className="w-full mb-3">
-                      Book Now
+                      Забронировать
                     </Button>
                   </Link>
                   
                   <p className="text-xs text-center text-muted-foreground">
-                    Free cancellation up to 24 hours before departure
+                    Бесплатная отмена за 24 часа до отправления
                   </p>
                 </CardContent>
               </Card>

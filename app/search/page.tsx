@@ -49,15 +49,15 @@ function SearchResults() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
             {city && country
-              ? `Tours in ${city}, ${country}`
+              ? `Туры в ${city}, ${country}`
               : country
-              ? `Tours in ${country}`
+              ? `Туры в ${country}`
               : city
-              ? `Tours in ${city}`
-              : "All Tours"}
+              ? `Туры в ${city}`
+              : "Все туры"}
           </h1>
           <p className="text-muted-foreground">
-            Found {tours.length} tour{tours.length !== 1 ? "s" : ""}
+            Найдено {tours.length} {tours.length === 1 ? 'тур' : tours.length < 5 ? 'тура' : 'туров'}
           </p>
         </div>
 
@@ -66,22 +66,22 @@ function SearchResults() {
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-4 space-y-6">
               <div>
-                <h3 className="font-semibold mb-4">Sort By</h3>
+                <h3 className="font-semibold mb-4">Сортировка</h3>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="rating">Highest Rated</SelectItem>
-                    <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                    <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                    <SelectItem value="rating">По рейтингу</SelectItem>
+                    <SelectItem value="price-asc">Цена: по возрастанию</SelectItem>
+                    <SelectItem value="price-desc">Цена: по убыванию</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <Label>Price Range</Label>
+                  <Label>Диапазон цен</Label>
                   <span className="text-sm text-muted-foreground">
                     ${priceRange[0]} - ${priceRange[1]}
                   </span>
@@ -104,7 +104,7 @@ function SearchResults() {
                   setPriceRange([minPrice, maxPrice]);
                 }}
               >
-                Reset Filters
+                Сбросить фильтры
               </Button>
             </div>
           </aside>
@@ -113,12 +113,12 @@ function SearchResults() {
           <div className="lg:col-span-3">
             {tours.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-12 text-center">
-                <h3 className="text-2xl font-semibold mb-2">No tours found</h3>
+                <h3 className="text-2xl font-semibold mb-2">Туры не найдены</h3>
                 <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters or search for a different destination
+                  Попробуйте изменить фильтры или поищите другое направление
                 </p>
                 <Button onClick={() => window.location.href = "/"}>
-                  Back to Home
+                  Вернуться на главную
                 </Button>
               </div>
             ) : (

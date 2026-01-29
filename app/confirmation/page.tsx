@@ -26,13 +26,13 @@ function ConfirmationContent() {
           <Card className="max-w-2xl mx-auto">
             <CardContent className="p-12 text-center">
               <h2 className="text-2xl font-semibold mb-4">
-                Booking Not Found
+                Бронирование не найдено
               </h2>
               <p className="text-muted-foreground mb-6">
-                We couldn't find your booking information.
+                Мы не смогли найти информацию о вашем бронировании.
               </p>
               <Link href="/">
-                <Button>Return to Home</Button>
+                <Button>Вернуться на главную</Button>
               </Link>
             </CardContent>
           </Card>
@@ -48,39 +48,39 @@ function ConfirmationContent() {
           <CardContent className="p-8 md:p-12">
             <div className="text-center mb-8">
               <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-4" />
-              <h1 className="text-4xl font-bold mb-2">Booking Received!</h1>
+              <h1 className="text-4xl font-bold mb-2">Бронирование получено!</h1>
               <p className="text-xl text-muted-foreground">
-                Thank you for your booking request
+                Спасибо за ваш запрос на бронирование
               </p>
             </div>
 
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-8">
               <div className="text-center">
                 <p className="text-sm text-blue-600 mb-2">
-                  Your Reference Number
+                  Ваш номер бронирования
                 </p>
                 <p className="text-3xl font-bold text-blue-900">
                   {referenceNumber}
                 </p>
                 <p className="text-sm text-blue-600 mt-2">
-                  Please save this number for your records
+                  Пожалуйста, сохраните этот номер для своих записей
                 </p>
               </div>
             </div>
 
             <div className="space-y-6 mb-8">
               <div>
-                <h3 className="font-semibold text-lg mb-4">What Happens Next?</h3>
+                <h3 className="font-semibold text-lg mb-4">Что дальше?</h3>
                 <ol className="space-y-3">
                   <li className="flex">
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-semibold mr-3 flex-shrink-0">
                       1
                     </span>
                     <div>
-                      <p className="font-semibold">Confirmation Email</p>
+                      <p className="font-semibold">Подтверждение по электронной почте</p>
                       <p className="text-sm text-muted-foreground">
-                        You'll receive a confirmation email at{" "}
-                        <strong>{bookingData.email}</strong> within 24 hours
+                        Вы получите письмо с подтверждением на{" "}
+                        <strong>{bookingData.email}</strong> в течение 24 часов
                       </p>
                     </div>
                   </li>
@@ -89,9 +89,9 @@ function ConfirmationContent() {
                       2
                     </span>
                     <div>
-                      <p className="font-semibold">Availability Check</p>
+                      <p className="font-semibold">Проверка наличия мест</p>
                       <p className="text-sm text-muted-foreground">
-                        Our team will verify availability for your chosen dates
+                        Наша команда проверит наличие мест на выбранные даты
                       </p>
                     </div>
                   </li>
@@ -100,10 +100,9 @@ function ConfirmationContent() {
                       3
                     </span>
                     <div>
-                      <p className="font-semibold">Payment Instructions</p>
+                      <p className="font-semibold">Инструкции по оплате</p>
                       <p className="text-sm text-muted-foreground">
-                        We'll send you secure payment instructions and final
-                        details
+                        Мы отправим вам инструкции по безопасной оплате и окончательные детали
                       </p>
                     </div>
                   </li>
@@ -111,28 +110,28 @@ function ConfirmationContent() {
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="font-semibold text-lg mb-3">Booking Details</h3>
+                <h3 className="font-semibold text-lg mb-3">Детали бронирования</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Tour</p>
+                    <p className="text-muted-foreground">Тур</p>
                     <p className="font-semibold">{bookingData.tourName}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Travel Date</p>
+                    <p className="text-muted-foreground">Дата поездки</p>
                     <p className="font-semibold">
-                      {new Date(bookingData.travelDate).toLocaleDateString()}
+                      {new Date(bookingData.travelDate).toLocaleDateString('ru-RU')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Travelers</p>
+                    <p className="text-muted-foreground">Путешественники</p>
                     <p className="font-semibold">
-                      {bookingData.adults} adults
+                      {bookingData.adults} взрослых
                       {parseInt(bookingData.children) > 0 &&
-                        `, ${bookingData.children} children`}
+                        `, ${bookingData.children} детей`}
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Contact</p>
+                    <p className="text-muted-foreground">Контакт</p>
                     <p className="font-semibold">{bookingData.fullName}</p>
                   </div>
                 </div>
@@ -143,7 +142,7 @@ function ConfirmationContent() {
               <Link href="/" className="flex-1">
                 <Button variant="outline" className="w-full">
                   <Home className="h-4 w-4 mr-2" />
-                  Back to Home
+                  Вернуться на главную
                 </Button>
               </Link>
               <Button
@@ -151,25 +150,25 @@ function ConfirmationContent() {
                 onClick={() => window.print()}
               >
                 <Download className="h-4 w-4 mr-2" />
-                Print Confirmation
+                Распечатать подтверждение
               </Button>
             </div>
 
             <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center">
               <p className="text-sm text-muted-foreground">
-                Questions? Contact us at{" "}
+                Вопросы? Свяжитесь с нами по адресу{" "}
                 <a
-                  href="mailto:info@traveltours.com"
+                  href="mailto:info@baitour.com"
                   className="text-primary hover:underline"
                 >
-                  info@traveltours.com
+                  info@baitour.com
                 </a>{" "}
-                or call{" "}
+                или позвоните{" "}
                 <a
-                  href="tel:+15551234567"
+                  href="tel:+77001234567"
                   className="text-primary hover:underline"
                 >
-                  +1 (555) 123-4567
+                  +7 (700) 123-4567
                 </a>
               </p>
             </div>

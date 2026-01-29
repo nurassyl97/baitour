@@ -20,11 +20,10 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Discover Your Next Adventure
+            Откройте для себя новое приключение
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-            Explore amazing tours and experiences around the world with expert
-            guides and unforgettable memories
+            Исследуйте удивительные туры и впечатления по всему миру с опытными гидами и незабываемыми воспоминаниями
           </p>
           <div className="max-w-4xl mx-auto">
             <SearchForm />
@@ -36,9 +35,9 @@ export default function HomePage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Popular Tours</h2>
+            <h2 className="text-4xl font-bold mb-4">Популярные туры</h2>
             <p className="text-lg text-muted-foreground">
-              Handpicked tours loved by thousands of travelers
+              Отобранные туры, которые полюбили тысячи путешественников
             </p>
           </div>
 
@@ -50,7 +49,7 @@ export default function HomePage() {
 
           <div className="text-center mt-8">
             <Link href="/search">
-              <Button size="lg">View All Tours</Button>
+              <Button size="lg">Посмотреть все туры</Button>
             </Link>
           </div>
         </div>
@@ -60,9 +59,9 @@ export default function HomePage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Why Choose Us</h2>
+            <h2 className="text-4xl font-bold mb-4">Почему выбирают нас</h2>
             <p className="text-lg text-muted-foreground">
-              We make your travel dreams come true
+              Мы воплощаем ваши мечты о путешествиях в реальность
             </p>
           </div>
 
@@ -72,10 +71,10 @@ export default function HomePage() {
                 <MapPin className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">
-                Worldwide Destinations
+                Направления по всему миру
               </h3>
               <p className="text-muted-foreground">
-                Tours in over 50 countries across all continents
+                Туры в более чем 50 странах на всех континентах
               </p>
             </div>
 
@@ -83,9 +82,9 @@ export default function HomePage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
                 <Award className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Expert Guides</h3>
+              <h3 className="text-xl font-semibold mb-2">Опытные гиды</h3>
               <p className="text-muted-foreground">
-                Professional local guides with years of experience
+                Профессиональные местные гиды с многолетним опытом
               </p>
             </div>
 
@@ -93,9 +92,9 @@ export default function HomePage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
                 <Shield className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Best Price Guarantee</h3>
+              <h3 className="text-xl font-semibold mb-2">Гарантия лучшей цены</h3>
               <p className="text-muted-foreground">
-                Competitive prices and flexible payment options
+                Конкурентные цены и гибкие варианты оплаты
               </p>
             </div>
 
@@ -103,9 +102,9 @@ export default function HomePage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
                 <HeadphonesIcon className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
+              <h3 className="text-xl font-semibold mb-2">Поддержка 24/7</h3>
               <p className="text-muted-foreground">
-                Always here to help before, during, and after your trip
+                Всегда готовы помочь до, во время и после вашей поездки
               </p>
             </div>
           </div>
@@ -116,27 +115,24 @@ export default function HomePage() {
       <section id="about" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-4">About TravelTours</h2>
+            <h2 className="text-4xl font-bold mb-4">О компании BaiTour</h2>
             <p className="text-lg text-muted-foreground mb-6">
-              We are a passionate team of travel enthusiasts dedicated to
-              creating unforgettable experiences for our customers. With over 10
-              years of experience in the travel industry, we carefully curate
-              each tour to ensure the highest quality and value.
+              Мы - команда увлеченных энтузиастов путешествий, посвятившая себя созданию незабываемых впечатлений для наших клиентов. Имея более 10 лет опыта в индустрии туризма, мы тщательно подбираем каждый тур, чтобы обеспечить высочайшее качество и ценность.
             </p>
             <div id="contact" className="mt-12 p-8 bg-white rounded-lg shadow">
-              <h3 className="text-2xl font-semibold mb-4">Get in Touch</h3>
+              <h3 className="text-2xl font-semibold mb-4">Свяжитесь с нами</h3>
               <p className="text-muted-foreground mb-4">
-                Have questions? We'd love to hear from you.
+                Есть вопросы? Мы будем рады услышать вас.
               </p>
               <div className="space-y-2">
                 <p>
-                  <strong>Email:</strong> info@traveltours.com
+                  <strong>Email:</strong> info@baitour.com
                 </p>
                 <p>
-                  <strong>Phone:</strong> +1 (555) 123-4567
+                  <strong>Телефон:</strong> +7 (700) 123-4567
                 </p>
                 <p>
-                  <strong>Hours:</strong> Mon-Fri 9AM-6PM EST
+                  <strong>Часы работы:</strong> Пн-Пт 9:00-18:00
                 </p>
               </div>
             </div>
