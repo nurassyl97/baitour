@@ -32,11 +32,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: TourPageProps): Promise<Metadata> {
-  const tour = getTourById(params.id);
+  // Clean the ID parameter - extract only the numeric part
+  const cleanId = params.id.toString().split(/[\s(]/)[0];
+  const tour = getTourById(cleanId);
 
   if (!tour) {
     return {
-      title: "Tour Not Found",
+      title: "Тур не найден",
     };
   }
 
@@ -52,7 +54,9 @@ export async function generateMetadata({
 }
 
 export default function TourPage({ params }: TourPageProps) {
-  const tour = getTourById(params.id);
+  // Clean the ID parameter - extract only the numeric part  
+  const cleanId = params.id.toString().split(/[\s(]/)[0];
+  const tour = getTourById(cleanId);
 
   if (!tour) {
     notFound();
