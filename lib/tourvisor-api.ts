@@ -260,18 +260,18 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   if (params.dateFrom) {
     queryParams.append('dateFrom', params.dateFrom);
   } else {
-    // Default to tomorrow (today might be too close)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    queryParams.append('dateFrom', tomorrow.toISOString().split('T')[0]);
+    // Default to 7 days from now
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+    queryParams.append('dateFrom', sevenDaysLater.toISOString().split('T')[0]);
   }
   if (params.dateTo) {
     queryParams.append('dateTo', params.dateTo);
   } else {
-    // Default to 60 days from now (more reasonable range)
-    const sixtyDaysLater = new Date();
-    sixtyDaysLater.setDate(sixtyDaysLater.getDate() + 60);
-    queryParams.append('dateTo', sixtyDaysLater.toISOString().split('T')[0]);
+    // Default to 14 days from now (1 week range)
+    const fourteenDaysLater = new Date();
+    fourteenDaysLater.setDate(fourteenDaysLater.getDate() + 14);
+    queryParams.append('dateTo', fourteenDaysLater.toISOString().split('T')[0]);
   }
   
   // Optional parameters
