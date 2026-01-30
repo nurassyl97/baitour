@@ -307,7 +307,7 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     queryParams.append('hotelCategory', params.hotelCategory.toString());
   }
   
-  const fullUrl = `/tours/search?${queryParams.toString()}`;
+  const fullUrl = `/search?${queryParams.toString()}`;
   console.log('Calling Tourvisor API with URL:', fullUrl);
   console.log('Full query params:', queryParams.toString());
   
@@ -323,7 +323,7 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
  * @param searchId Search ID from startTourSearch
  */
 export async function getSearchResults(searchId: string): Promise<TourvisorSearchResult> {
-  return await tourvisorFetch<TourvisorSearchResult>(`/tours/search/result?searchId=${searchId}`);
+  return await tourvisorFetch<TourvisorSearchResult>(`/search/result?searchId=${searchId}`);
 }
 
 /**
@@ -331,7 +331,7 @@ export async function getSearchResults(searchId: string): Promise<TourvisorSearc
  * @param searchId Search ID from startTourSearch
  */
 export async function getSearchStatus(searchId: string): Promise<{ isComplete: boolean; progress?: number }> {
-  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/tours/search/status?searchId=${searchId}`);
+  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/search/status?searchId=${searchId}`);
 }
 
 /**
@@ -412,7 +412,7 @@ export async function pollSearchResults(
  * For extending search to more operators
  */
 export async function continueTourSearch(searchId: string): Promise<void> {
-  await tourvisorFetchWithRetry(`/tours/search/continue?searchId=${searchId}`, {
+  await tourvisorFetchWithRetry(`/search/continue?searchId=${searchId}`, {
     method: 'POST',
   });
 }
