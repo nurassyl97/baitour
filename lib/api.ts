@@ -107,27 +107,13 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
 }
 
 /**
- * Get all tours (popular tours from hot deals)
+ * Get all tours
+ * Note: Using mock data as hot tours API endpoint is not available
  */
 export async function getAllTours(): Promise<Tour[]> {
-  if (!useRealAPI) {
-    return mockData.getAllTours();
-  }
-
-  try {
-    // Get hot tours as featured tours
-    const hotTours = await tourvisorApi.getHotTours({
-      departureId: DEFAULT_DEPARTURE_ID,
-      currency: 'USD',
-      onlyCharter: false,
-      limit: 20,
-    });
-
-    return tourvisorAdapter.transformHotTours(hotTours);
-  } catch (error) {
-    console.error('Failed to fetch tours from Tourvisor, falling back to mock data:', error);
-    return mockData.getAllTours();
-  }
+  // Use mock data since hot tours API is not available
+  // Tours will be populated through search functionality
+  return mockData.getAllTours();
 }
 
 /**
@@ -325,24 +311,10 @@ export async function getCitiesByCountry(country: string): Promise<string[]> {
 }
 
 /**
- * Get popular tours (hot deals)
+ * Get popular tours
+ * Note: Using mock data as hot tours API endpoint is not available
  */
 export async function getPopularTours(limit: number = 6): Promise<Tour[]> {
-  if (!useRealAPI) {
-    return mockData.getPopularTours(limit);
-  }
-
-  try {
-    const hotTours = await tourvisorApi.getHotTours({
-      departureId: DEFAULT_DEPARTURE_ID,
-      currency: 'USD',
-      onlyCharter: false,
-      limit: limit,
-    });
-
-    return tourvisorAdapter.transformHotTours(hotTours);
-  } catch (error) {
-    console.error('Failed to fetch hot tours:', error);
-    return mockData.getPopularTours(limit);
-  }
+  // Always use mock data for popular tours since hot tours API is not available
+  return mockData.getPopularTours(limit);
 }
