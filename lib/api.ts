@@ -263,13 +263,21 @@ export async function submitBooking(booking: BookingRequest): Promise<{ success:
 /**
  * Get unique countries from Tourvisor API
  */
+// Fallback list of popular countries (in case API is rate-limited)
+const FALLBACK_COUNTRIES = [
+  'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
+  'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
+  'Марокко', 'Вьетнам', 'Черногория', 'Китай', 'Филиппины',
+  'Маврикий', 'Сейшелы', 'Малайзия', 'Венгрия', 'Танзания'
+].sort();
+
 export async function getCountries(): Promise<string[]> {
   try {
     const countries = await tourvisorApi.getCountries(DEFAULT_DEPARTURE_ID);
     return countries.map(c => c.name).sort();
   } catch (error) {
-    console.error('Failed to fetch countries from Tourvisor:', error);
-    return [];
+    console.warn('Failed to fetch countries from Tourvisor (likely rate limit), using fallback list');
+    return FALLBACK_COUNTRIES;
   }
 }
 
