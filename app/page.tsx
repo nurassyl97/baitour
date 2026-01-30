@@ -1,12 +1,9 @@
 import { SearchForm } from "@/components/search-form";
-import { TourCard } from "@/components/tour-card";
-import { getPopularTours } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MapPin, Shield, Award, HeadphonesIcon } from "lucide-react";
 
-export default async function HomePage() {
-  const popularTours = await getPopularTours(6);
+export default function HomePage() {
 
   return (
     <div>
@@ -31,26 +28,18 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Popular Tours */}
+      {/* Search Call-to-Action - replacing popular tours */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Популярные туры</h2>
-            <p className="text-lg text-muted-foreground">
-              Отобранные туры, которые полюбили тысячи путешественников
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-bold mb-4">Найдите свой идеальный тур</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Воспользуйтесь формой поиска выше, чтобы найти туры по вашим предпочтениям. 
+              Мы предлагаем широкий выбор направлений и отелей на любой вкус и бюджет.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {popularTours.map((tour) => (
-              <TourCard key={tour.id} tour={tour} />
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
             <Link href="/search">
               <Button size="lg" className="bg-[#FFC800] hover:bg-[#FFD700] text-gray-900 font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
-                Посмотреть все туры
+                Начать поиск туров
               </Button>
             </Link>
           </div>

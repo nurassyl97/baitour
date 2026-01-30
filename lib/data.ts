@@ -91,19 +91,25 @@ export function searchTours(params: SearchParams): Tour[] {
 }
 
 export function getPopularTours(limit: number = 6): Tour[] {
-  return getAllTours()
+  const tours = getAllTours();
+  if (tours.length === 0) return [];
+  return tours
     .sort((a, b) => b.reviewCount - a.reviewCount)
     .slice(0, limit);
 }
 
 export function getCountries(): string[] {
-  const countries = new Set(getAllTours().map((tour) => tour.country));
+  const tours = getAllTours();
+  if (tours.length === 0) return [];
+  const countries = new Set(tours.map((tour) => tour.country));
   return Array.from(countries).sort();
 }
 
 export function getCitiesByCountry(country: string): string[] {
+  const tours = getAllTours();
+  if (tours.length === 0) return [];
   const cities = new Set(
-    getAllTours()
+    tours
       .filter((tour) => tour.country.toLowerCase() === country.toLowerCase())
       .map((tour) => tour.city)
   );
@@ -112,6 +118,7 @@ export function getCitiesByCountry(country: string): string[] {
 
 export function getPriceRange(): { min: number; max: number } {
   const tours = getAllTours();
+  if (tours.length === 0) return { min: 0, max: 5000 };
   const prices = tours.map((tour) => tour.price);
   return {
     min: Math.min(...prices),

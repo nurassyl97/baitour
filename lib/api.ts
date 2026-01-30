@@ -1,18 +1,16 @@
 // API Service Layer for Tours
-// Integrates with Tourvisor API and provides fallback to mock data
+// Integrates with Tourvisor API
 
 import { Tour, SearchParams } from './data';
-import * as mockData from './data';
 import * as tourvisorApi from './tourvisor-api';
 import * as tourvisorAdapter from './tourvisor-adapter';
 import { TourvisorSearchRequest } from './tourvisor-types';
 
 // API Configuration
-const DATA_SOURCE = process.env.NEXT_PUBLIC_DATA_SOURCE || 'mock';
 const DEFAULT_DEPARTURE_ID = parseInt(process.env.NEXT_PUBLIC_DEFAULT_DEPARTURE_ID || '27'); // Almaty
 
-// Check if we should use real API or mock data
-const useRealAPI = DATA_SOURCE === 'api' && tourvisorApi.isTourvisorConfigured();
+// Always use Tourvisor API
+const useRealAPI = true;
 
 // Cache for country name to ID mapping
 let countryNameToIdCache: Map<string, number> | null = null;
@@ -108,22 +106,18 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
 
 /**
  * Get all tours
- * Note: Using mock data as hot tours API endpoint is not available
+ * Note: Returns empty array. Use search functionality to get tours from API.
  */
 export async function getAllTours(): Promise<Tour[]> {
-  // Use mock data since hot tours API is not available
-  // Tours will be populated through search functionality
-  return mockData.getAllTours();
+  // Tours are loaded through search functionality from Tourvisor API
+  // This function returns empty array as we don't have a "get all" endpoint
+  return [];
 }
 
 /**
  * Get tour by ID
  */
 export async function getTourById(id: string): Promise<Tour | undefined> {
-  if (!useRealAPI) {
-    return mockData.getTourById(id);
-  }
-
   try {
     const tourvisorTour = await tourvisorApi.getTourDetails(id);
     
@@ -137,8 +131,8 @@ export async function getTourById(id: string): Promise<Tour | undefined> {
 
     return tourvisorAdapter.transformTourvisorTour(tourvisorTour, hotelDescription);
   } catch (error) {
-    console.error(`Failed to fetch tour ${id} from Tourvisor, falling back to mock data:`, error);
-    return mockData.getTourById(id);
+    console.error(`Failed to fetch tour ${id} from Tourvisor:`, error);
+    return undefined;
   }
 }
 
@@ -146,17 +140,13 @@ export async function getTourById(id: string): Promise<Tour | undefined> {
  * Get tour by slug
  */
 export async function getTourBySlug(slug: string): Promise<Tour | undefined> {
-  if (!useRealAPI) {
-    return mockData.getTourBySlug(slug);
-  }
-
   // Extract tour ID from slug (format: hotel-name-country-nights-ID)
   const parts = slug.split('-');
   const tourId = parts[parts.length - 1];
 
   if (!tourId) {
     console.error('Invalid slug format:', slug);
-    return mockData.getTourBySlug(slug);
+    return undefined;
   }
 
   return getTourById(tourId);
@@ -169,10 +159,6 @@ export async function searchTours(
   params: SearchParams,
   onProgress?: (progress: number) => void
 ): Promise<Tour[]> {
-  if (!useRealAPI) {
-    return mockData.searchTours(params);
-  }
-
   try {
     console.log('Starting Tourvisor search with params:', params);
 
@@ -181,8 +167,8 @@ export async function searchTours(
 
     // Check if we have valid country IDs
     if (!tourvisorParams.countryIds || tourvisorParams.countryIds.length === 0) {
-      console.warn('No valid country selected, falling back to mock data');
-      return mockData.searchTours(params);
+      console.warn('No valid country selected for search');
+      return [];
     }
 
     console.log('Tourvisor search params:', tourvisorParams);
@@ -215,8 +201,8 @@ export async function searchTours(
 
     return tours;
   } catch (error) {
-    console.error('Failed to search tours via Tourvisor, falling back to mock data:', error);
-    return mockData.searchTours(params);
+    console.error('Failed to search tours via Tourvisor:', error);
+    throw error; // Re-throw to let caller handle the error
   }
 }
 
@@ -267,30 +253,22 @@ export async function submitBooking(booking: BookingRequest): Promise<{ success:
 }
 
 /**
- * Get unique countries
+ * Get unique countries from Tourvisor API
  */
 export async function getCountries(): Promise<string[]> {
-  if (!useRealAPI) {
-    return mockData.getCountries();
-  }
-
   try {
     const countries = await tourvisorApi.getCountries(DEFAULT_DEPARTURE_ID);
     return countries.map(c => c.name).sort();
   } catch (error) {
     console.error('Failed to fetch countries from Tourvisor:', error);
-    return mockData.getCountries();
+    return [];
   }
 }
 
 /**
- * Get cities/regions for a specific country
+ * Get cities/regions for a specific country from Tourvisor API
  */
 export async function getCitiesByCountry(country: string): Promise<string[]> {
-  if (!useRealAPI) {
-    return mockData.getCitiesByCountry(country);
-  }
-
   try {
     // First, get the country ID
     const countries = await tourvisorApi.getCountries(DEFAULT_DEPARTURE_ID);
@@ -298,7 +276,7 @@ export async function getCitiesByCountry(country: string): Promise<string[]> {
 
     if (!countryObj) {
       console.warn(`Country "${country}" not found in Tourvisor`);
-      return mockData.getCitiesByCountry(country);
+      return [];
     }
 
     // Get regions for this country
@@ -306,15 +284,16 @@ export async function getCitiesByCountry(country: string): Promise<string[]> {
     return regions.map(r => r.name).sort();
   } catch (error) {
     console.error('Failed to fetch cities from Tourvisor:', error);
-    return mockData.getCitiesByCountry(country);
+    return [];
   }
 }
 
 /**
  * Get popular tours
- * Note: Using mock data as hot tours API endpoint is not available
+ * Note: Returns empty array. Use search to get tours.
  */
 export async function getPopularTours(limit: number = 6): Promise<Tour[]> {
-  // Always use mock data for popular tours since hot tours API is not available
-  return mockData.getPopularTours(limit);
+  // No hot tours API available - return empty array
+  // Homepage will show search form instead
+  return [];
 }
