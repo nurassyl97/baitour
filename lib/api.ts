@@ -27,11 +27,19 @@ async function getCountryIdByName(countryName: string): Promise<number | null> {
       countries.forEach(country => {
         countryNameToIdCache!.set(country.name.toLowerCase(), country.id);
       });
+      console.log('Country cache built:', Array.from(countryNameToIdCache.keys()));
     }
 
     // Try exact match first
-    const countryId = countryNameToIdCache.get(countryName.toLowerCase());
-    if (countryId) return countryId;
+    const normalizedName = countryName.toLowerCase().trim();
+    console.log(`Looking for country: "${normalizedName}"`);
+    const countryId = countryNameToIdCache.get(normalizedName);
+    if (countryId) {
+      console.log(`Found country ID: ${countryId}`);
+      return countryId;
+    }
+    console.warn(`Country "${countryName}" not found in cache`);
+
 
     // Try mapping common English names to Russian
     const englishToRussian: { [key: string]: string } = {
