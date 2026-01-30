@@ -241,9 +241,34 @@ export async function getCurrencyRates(): Promise<CurrencyRate[]> {
 export async function startTourSearch(params: TourvisorSearchRequest): Promise<string> {
   console.log('Starting tour search with params:', params);
   
-  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>('/tours/search', {
-    method: 'POST',
-    body: JSON.stringify(params),
+  // Build query string from params
+  const queryParams = new URLSearchParams();
+  queryParams.append('departureId', params.departureId.toString());
+  if (params.countryIds && params.countryIds.length > 0) {
+    params.countryIds.forEach(id => queryParams.append('countryIds', id.toString()));
+  }
+  if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
+    params.arrivalCityIds.forEach(id => queryParams.append('arrivalCityIds', id.toString()));
+  }
+  if (params.nights) {
+    queryParams.append('nightsFrom', params.nights.from.toString());
+    queryParams.append('nightsTo', params.nights.to.toString());
+  }
+  if (params.adults) {
+    queryParams.append('adults', params.adults.toString());
+  }
+  if (params.currency) {
+    queryParams.append('currency', params.currency);
+  }
+  if (params.priceFrom) {
+    queryParams.append('priceFrom', params.priceFrom.toString());
+  }
+  if (params.priceTo) {
+    queryParams.append('priceTo', params.priceTo.toString());
+  }
+  
+  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(`/tours/search?${queryParams.toString()}`, {
+    method: 'GET',
   });
 
   return response.searchId;
