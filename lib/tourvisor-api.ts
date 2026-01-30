@@ -251,10 +251,11 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     // API expects singular countryId, take first one
     queryParams.append('countryId', params.countryIds[0].toString());
   }
-  // Nights range - REQUIRED by API
-  queryParams.append('nightsFrom', params.nights.from.toString());
-  queryParams.append('nightsTo', params.nights.to.toString());
-  console.log('Nights being sent:', params.nights.from, 'to', params.nights.to);
+  // Nights range - TESTING: Set both to same value
+  const nightsValue = params.nights.from; // Use nightsFrom value for both
+  queryParams.append('nightsFrom', nightsValue.toString());
+  queryParams.append('nightsTo', nightsValue.toString()); // Same as nightsFrom
+  console.log('Nights being sent (same value):', nightsValue);
   queryParams.append('adults', params.adults.toString());
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
