@@ -166,19 +166,31 @@ export function SearchForm() {
             </Select>
           </div>
 
-          {/* Dates */}
-          <div className="space-y-1">
-            <Label htmlFor="dateFrom" className="text-xs text-gray-200">
+          {/* Date Range - Two separate fields like Tourvisor */}
+          <div className="space-y-1 md:col-span-2">
+            <Label className="text-xs text-gray-200">
               Даты вылета
             </Label>
-            <Input
-              id="dateFrom"
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="bg-white text-gray-900 h-12"
-            />
+            <div className="flex gap-2">
+              <Input
+                id="dateFrom"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                placeholder="От"
+                className="bg-white text-gray-900 h-12 flex-1"
+              />
+              <Input
+                id="dateTo"
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                min={dateFrom || new Date().toISOString().split("T")[0]}
+                placeholder="До"
+                className="bg-white text-gray-900 h-12 flex-1"
+              />
+            </div>
           </div>
 
           {/* Nights Range */}
