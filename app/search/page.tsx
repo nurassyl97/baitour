@@ -3,8 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { TourCard } from "@/components/tour-card";
-import { searchTours } from "@/lib/api";
-import { getPriceRange, type SearchParams, type Tour } from "@/lib/data";
+import { getPriceRange, type Tour } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,22 +37,38 @@ function SearchResults() {
       const city = searchParams.get("city") || undefined;
       const nightsParam = searchParams.get("nights");
       const nights = nightsParam ? parseInt(nightsParam) : undefined;
+      const travelersParam = searchParams.get("travelers");
+      const travelers = travelersParam ? parseInt(travelersParam) : undefined;
 
-      const params: SearchParams = {
+      const params = {
         country,
         city,
         nights,
+        travelers,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         sortBy: sortBy as any,
       };
 
       try {
-        // Pass progress callback to track search progress
-        const results = await searchTours(params, (progress) => {
-          setSearchProgress(progress);
+        console.log('Calling search API with params:', params);
+        
+        // Call our API route instead of searchTours directly
+        const response = await fetch('/api/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(params),
         });
-        setTours(results);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Search failed');
+        }
+
+        const data = await response.json();
+        setTours(data.tours || []);
         setSearchProgress(100);
       } catch (err: any) {
         console.error('Search error:', err);
