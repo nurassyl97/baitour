@@ -257,19 +257,32 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
   
-  // Date range - TESTING: Only send dateFrom, NOT dateTo
+  // Date range - BOTH are required
+  // Ensure dateFrom
+  let finalDateFrom: string;
   if (params.dateFrom) {
-    queryParams.append('dateFrom', params.dateFrom);
+    finalDateFrom = params.dateFrom;
   } else {
-    // Default to 7 days from now (typical booking window)
+    // Default to 7 days from now
     const sevenDaysLater = new Date();
     sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
-    queryParams.append('dateFrom', sevenDaysLater.toISOString().split('T')[0]);
+    finalDateFrom = sevenDaysLater.toISOString().split('T')[0];
   }
-  // TEMPORARILY REMOVING dateTo to test if API accepts it
-  // if (params.dateTo) {
-  //   queryParams.append('dateTo', params.dateTo);
-  // }
+  queryParams.append('dateFrom', finalDateFrom);
+  
+  // Ensure dateTo - must be AFTER dateFrom
+  let finalDateTo: string;
+  if (params.dateTo) {
+    finalDateTo = params.dateTo;
+  } else {
+    // Default to dateFrom + 7 days (not 30 days from today)
+    const dateFromObj = new Date(finalDateFrom);
+    dateFromObj.setDate(dateFromObj.getDate() + 7);
+    finalDateTo = dateFromObj.toISOString().split('T')[0];
+  }
+  queryParams.append('dateTo', finalDateTo);
+  
+  console.log('Final dates being sent:', { finalDateFrom, finalDateTo });
   
   // Optional parameters
   if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
