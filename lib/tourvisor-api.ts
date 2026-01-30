@@ -251,8 +251,8 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     // API expects singular countryId, take first one
     queryParams.append('countryId', params.countryIds[0].toString());
   }
-  // TESTING: Try single nights parameter instead of range
-  queryParams.append('nights', params.nights.from.toString());
+  // TESTING: Remove nights parameter entirely to see what API expects
+  // queryParams.append('nights', params.nights.from.toString());
   // queryParams.append('nightsFrom', params.nights.from.toString());
   // queryParams.append('nightsTo', params.nights.to.toString());
   queryParams.append('adults', params.adults.toString());
