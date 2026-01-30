@@ -77,11 +77,16 @@ export function SearchForm() {
     e.preventDefault();
     
     const params = new URLSearchParams();
+    params.append("searchType", searchType);
     if (country) params.append("country", country);
     if (city) params.append("city", city);
-    if (dateFrom) params.append("dates", dateFrom);
-    if (nightsFrom) params.append("nights", nightsFrom);
-    if (travelers) params.append("travelers", travelers);
+    if (dateFrom) params.append("dateFrom", dateFrom);
+    if (dateTo) params.append("dateTo", dateTo);
+    params.append("nightsFrom", nightsFrom);
+    params.append("nightsTo", nightsTo);
+    params.append("adults", travelers);
+    params.append("children", "0");
+    if (hotelStars > 0) params.append("hotelStars", hotelStars.toString());
 
     router.push(`/search?${params.toString()}`);
   };

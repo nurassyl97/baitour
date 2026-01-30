@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { TourCard } from "@/components/tour-card";
-import { getPriceRange, type Tour } from "@/lib/data";
+import { type Tour } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,8 +24,6 @@ function SearchResults() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  
-  const { min: minPrice, max: maxPrice } = getPriceRange();
 
   useEffect(() => {
     async function performSearch() {
@@ -35,16 +33,22 @@ function SearchResults() {
 
       const country = searchParams.get("country") || undefined;
       const city = searchParams.get("city") || undefined;
-      const nightsParam = searchParams.get("nights");
-      const nights = nightsParam ? parseInt(nightsParam) : undefined;
-      const travelersParam = searchParams.get("travelers");
-      const travelers = travelersParam ? parseInt(travelersParam) : undefined;
+      const dateFrom = searchParams.get("dateFrom") || undefined;
+      const dateTo = searchParams.get("dateTo") || undefined;
+      const nightsFromParam = searchParams.get("nightsFrom");
+      const nightsToParam = searchParams.get("nightsTo");
+      const adultsParam = searchParams.get("adults");
+      const childrenParam = searchParams.get("children");
 
       const params = {
         country,
         city,
-        nights,
-        travelers,
+        dateFrom,
+        dateTo,
+        nightsFrom: nightsFromParam ? parseInt(nightsFromParam) : undefined,
+        nightsTo: nightsToParam ? parseInt(nightsToParam) : undefined,
+        adults: adultsParam ? parseInt(adultsParam) : undefined,
+        children: childrenParam ? parseInt(childrenParam) : undefined,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         sortBy: sortBy as any,
