@@ -241,7 +241,7 @@ export async function getCurrencyRates(): Promise<CurrencyRate[]> {
 export async function startTourSearch(params: TourvisorSearchRequest): Promise<string> {
   console.log('Starting tour search with params:', params);
   
-  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>('/tour-search', {
+  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>('/tours/search', {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -254,7 +254,7 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
  * @param searchId Search ID from startTourSearch
  */
 export async function getSearchResults(searchId: string): Promise<TourvisorSearchResult> {
-  return await tourvisorFetch<TourvisorSearchResult>(`/tour-search/result?searchId=${searchId}`);
+  return await tourvisorFetch<TourvisorSearchResult>(`/tours/search/result?searchId=${searchId}`);
 }
 
 /**
@@ -262,7 +262,7 @@ export async function getSearchResults(searchId: string): Promise<TourvisorSearc
  * @param searchId Search ID from startTourSearch
  */
 export async function getSearchStatus(searchId: string): Promise<{ isComplete: boolean; progress?: number }> {
-  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/tour-search/status?searchId=${searchId}`);
+  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/tours/search/status?searchId=${searchId}`);
 }
 
 /**
@@ -343,7 +343,7 @@ export async function pollSearchResults(
  * For extending search to more operators
  */
 export async function continueTourSearch(searchId: string): Promise<void> {
-  await tourvisorFetchWithRetry(`/tour-search/continue?searchId=${searchId}`, {
+  await tourvisorFetchWithRetry(`/tours/search/continue?searchId=${searchId}`, {
     method: 'POST',
   });
 }
