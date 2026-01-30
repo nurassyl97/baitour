@@ -76,20 +76,15 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
     departureId: DEFAULT_DEPARTURE_ID,
     countryIds: [],
     nights: {
-      from: params.nights || 3,
-      to: params.nights || 14,
+      from: params.nightsFrom || 6,
+      to: params.nightsTo || 6,
     },
-    adults: 2,
-    currency: 'KZT', // Kazakhstan Tenge (departure from Almaty)
+    adults: params.adults || 2,
+    children: params.children || 0,
+    currency: 'KZT', // Kazakhstan Tenge
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
   };
-
-  // If specific nights are provided, use narrow range
-  if (params.nights) {
-    tourvisorParams.nights = {
-      from: params.nights,
-      to: params.nights,
-    };
-  }
 
   // Map country name to ID
   if (params.country) {
@@ -99,6 +94,11 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
     } else {
       console.warn(`Country "${params.country}" not found in Tourvisor`);
     }
+  }
+
+  // Hotel category (rating)
+  if (params.hotelCategory && params.hotelCategory > 0) {
+    tourvisorParams.hotelCategory = params.hotelCategory;
   }
 
   // Price range

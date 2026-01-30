@@ -39,6 +39,7 @@ function SearchResults() {
       const nightsToParam = searchParams.get("nightsTo");
       const adultsParam = searchParams.get("adults");
       const childrenParam = searchParams.get("children");
+      const hotelStarsParam = searchParams.get("hotelStars");
 
       const params = {
         country,
@@ -49,6 +50,7 @@ function SearchResults() {
         nightsTo: nightsToParam ? parseInt(nightsToParam) : undefined,
         adults: adultsParam ? parseInt(adultsParam) : undefined,
         children: childrenParam ? parseInt(childrenParam) : undefined,
+        hotelCategory: hotelStarsParam ? parseInt(hotelStarsParam) : undefined,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         sortBy: sortBy as any,
