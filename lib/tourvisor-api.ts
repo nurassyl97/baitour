@@ -257,7 +257,7 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
   
-  // Date range - required
+  // Date range - TESTING: Only send dateFrom, NOT dateTo
   if (params.dateFrom) {
     queryParams.append('dateFrom', params.dateFrom);
   } else {
@@ -266,14 +266,10 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
     queryParams.append('dateFrom', sevenDaysLater.toISOString().split('T')[0]);
   }
-  if (params.dateTo) {
-    queryParams.append('dateTo', params.dateTo);
-  } else {
-    // Default to 30 days from now (3-4 week window)
-    const thirtyDaysLater = new Date();
-    thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-    queryParams.append('dateTo', thirtyDaysLater.toISOString().split('T')[0]);
-  }
+  // TEMPORARILY REMOVING dateTo to test if API accepts it
+  // if (params.dateTo) {
+  //   queryParams.append('dateTo', params.dateTo);
+  // }
   
   // Optional parameters
   if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
