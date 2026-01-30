@@ -80,7 +80,7 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
       to: params.nights || 14,
     },
     adults: 2,
-    currency: 'USD',
+    currency: 'KZT', // Kazakhstan Tenge (departure from Almaty)
   };
 
   // If specific nights are provided, use narrow range
