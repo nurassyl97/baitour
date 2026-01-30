@@ -241,31 +241,56 @@ export async function getCurrencyRates(): Promise<CurrencyRate[]> {
 export async function startTourSearch(params: TourvisorSearchRequest): Promise<string> {
   console.log('Starting tour search with params:', params);
   
-  // Build query string from params
+  // Build query string from params - following exact API spec
   const queryParams = new URLSearchParams();
-  queryParams.append('departure', params.departureId.toString());
+  
+  // Required parameters
+  queryParams.append('departureId', params.departureId.toString());
   if (params.countryIds && params.countryIds.length > 0) {
-    // Try comma-separated format
-    queryParams.append('countries', params.countryIds.join(','));
+    // API expects singular countryId, take first one
+    queryParams.append('countryId', params.countryIds[0].toString());
   }
+  queryParams.append('nightsFrom', params.nights.from.toString());
+  queryParams.append('nightsTo', params.nights.to.toString());
+  queryParams.append('adults', params.adults.toString());
+  queryParams.append('currency', params.currency);
+  queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
+  
+  // Date range - required
+  if (params.dateFrom) {
+    queryParams.append('dateFrom', params.dateFrom);
+  } else {
+    // Default to today
+    const today = new Date().toISOString().split('T')[0];
+    queryParams.append('dateFrom', today);
+  }
+  if (params.dateTo) {
+    queryParams.append('dateTo', params.dateTo);
+  } else {
+    // Default to 6 months from now
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+    queryParams.append('dateTo', sixMonthsLater.toISOString().split('T')[0]);
+  }
+  
+  // Optional parameters
   if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
-    queryParams.append('arrivals', params.arrivalCityIds.join(','));
-  }
-  if (params.nights) {
-    queryParams.append('nightsMin', params.nights.from.toString());
-    queryParams.append('nightsMax', params.nights.to.toString());
-  }
-  if (params.adults) {
-    queryParams.append('adults', params.adults.toString());
-  }
-  if (params.currency) {
-    queryParams.append('currency', params.currency);
+    queryParams.append('arrivalId', params.arrivalCityIds[0].toString());
   }
   if (params.priceFrom) {
-    queryParams.append('priceMin', params.priceFrom.toString());
+    queryParams.append('priceFrom', params.priceFrom.toString());
   }
   if (params.priceTo) {
-    queryParams.append('priceMax', params.priceTo.toString());
+    queryParams.append('priceTo', params.priceTo.toString());
+  }
+  if (params.regionIds && params.regionIds.length > 0) {
+    params.regionIds.forEach(id => queryParams.append('regionIds', id.toString()));
+  }
+  if (params.meal) {
+    queryParams.append('meal', params.meal.toString());
+  }
+  if (params.hotelCategory) {
+    queryParams.append('hotelCategory', params.hotelCategory.toString());
   }
   
   const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(`/tours/search?${queryParams.toString()}`, {
