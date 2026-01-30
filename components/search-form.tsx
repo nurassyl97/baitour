@@ -41,6 +41,12 @@ export function SearchForm() {
         setCountries(data.countries || []);
       } catch (error) {
         console.error('Failed to load countries:', error);
+        // Fallback list of popular countries
+        setCountries([
+          'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
+          'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
+          'Марокко', 'Вьетнам', 'Черногория', 'Китай'
+        ]);
       } finally {
         setIsLoadingCountries(false);
       }
