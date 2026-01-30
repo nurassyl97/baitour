@@ -34,20 +34,35 @@ export function SearchForm() {
   useEffect(() => {
     async function loadCountries() {
       setIsLoadingCountries(true);
-      try {
-        const response = await fetch('/api/countries');
-        if (!response.ok) throw new Error('Failed to load countries');
-        const data = await response.json();
-        setCountries(data.countries || []);
-      } catch (error) {
-        console.error('Failed to load countries:', error);
-        // Fallback list of popular countries
+      
+      // Set a timeout to use fallback if API takes too long
+      const timeoutId = setTimeout(() => {
+        console.log('API timeout, using fallback countries');
         setCountries([
           'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
           'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
           'Марокко', 'Вьетнам', 'Черногория', 'Китай'
         ]);
-      } finally {
+        setIsLoadingCountries(false);
+      }, 5000); // 5 second timeout
+      
+      try {
+        const response = await fetch('/api/countries', { 
+          signal: AbortSignal.timeout(5000) 
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) throw new Error('Failed to load countries');
+        const data = await response.json();
+        setCountries(data.countries || []);
+        setIsLoadingCountries(false);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.warn('Failed to load countries, using fallback:', error);
+        setCountries([
+          'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
+          'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
+          'Марокко', 'Вьетнам', 'Черногория', 'Китай'
+        ]);
         setIsLoadingCountries(false);
       }
     }
