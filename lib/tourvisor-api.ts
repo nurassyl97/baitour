@@ -240,6 +240,7 @@ export async function getCurrencyRates(): Promise<CurrencyRate[]> {
  */
 export async function startTourSearch(params: TourvisorSearchRequest): Promise<string> {
   console.log('Starting tour search with params:', params);
+  console.log('Date values - dateFrom:', params.dateFrom, 'dateTo:', params.dateTo);
   
   // Build query string from params - following exact API spec
   const queryParams = new URLSearchParams();
@@ -294,7 +295,11 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     queryParams.append('hotelCategory', params.hotelCategory.toString());
   }
   
-  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(`/tours/search?${queryParams.toString()}`, {
+  const fullUrl = `/tours/search?${queryParams.toString()}`;
+  console.log('Calling Tourvisor API with URL:', fullUrl);
+  console.log('Full query params:', queryParams.toString());
+  
+  const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(fullUrl, {
     method: 'GET',
   });
 
