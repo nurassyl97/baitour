@@ -243,16 +243,17 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   
   // Build query string from params
   const queryParams = new URLSearchParams();
-  queryParams.append('departureId', params.departureId.toString());
+  queryParams.append('departure', params.departureId.toString());
   if (params.countryIds && params.countryIds.length > 0) {
-    params.countryIds.forEach(id => queryParams.append('countryIds', id.toString()));
+    // Try comma-separated format
+    queryParams.append('countries', params.countryIds.join(','));
   }
   if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
-    params.arrivalCityIds.forEach(id => queryParams.append('arrivalCityIds', id.toString()));
+    queryParams.append('arrivals', params.arrivalCityIds.join(','));
   }
   if (params.nights) {
-    queryParams.append('nightsFrom', params.nights.from.toString());
-    queryParams.append('nightsTo', params.nights.to.toString());
+    queryParams.append('nightsMin', params.nights.from.toString());
+    queryParams.append('nightsMax', params.nights.to.toString());
   }
   if (params.adults) {
     queryParams.append('adults', params.adults.toString());
@@ -261,10 +262,10 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     queryParams.append('currency', params.currency);
   }
   if (params.priceFrom) {
-    queryParams.append('priceFrom', params.priceFrom.toString());
+    queryParams.append('priceMin', params.priceFrom.toString());
   }
   if (params.priceTo) {
-    queryParams.append('priceTo', params.priceTo.toString());
+    queryParams.append('priceMax', params.priceTo.toString());
   }
   
   const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(`/tours/search?${queryParams.toString()}`, {
