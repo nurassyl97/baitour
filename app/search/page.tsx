@@ -20,7 +20,7 @@ function SearchResults() {
   const searchParams = useSearchParams();
   const [tours, setTours] = useState<Tour[]>([]);
   const [sortBy, setSortBy] = useState<string>("rating");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -135,8 +135,8 @@ function SearchResults() {
                 <Slider
                   value={priceRange}
                   onValueChange={(value) => setPriceRange(value as [number, number])}
-                  min={minPrice}
-                  max={maxPrice}
+                  min={0}
+                  max={5000}
                   step={50}
                   className="mb-2"
                   disabled={isLoading}
@@ -148,7 +148,7 @@ function SearchResults() {
                 className="w-full"
                 onClick={() => {
                   setSortBy("rating");
-                  setPriceRange([minPrice, maxPrice]);
+                  setPriceRange([0, 5000]);
                 }}
                 disabled={isLoading}
               >
