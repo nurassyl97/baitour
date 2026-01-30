@@ -12,17 +12,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Star } from "lucide-react";
+
 export function SearchForm() {
   const router = useRouter();
+  const [searchType, setSearchType] = useState("tours");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [dates, setDates] = useState("");
-  const [nights, setNights] = useState("7");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [nightsFrom, setNightsFrom] = useState("6");
+  const [nightsTo, setNightsTo] = useState("14");
   const [travelers, setTravelers] = useState("2");
   const [countries, setCountries] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(false);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [hotelStars, setHotelStars] = useState<number>(0);
 
   // Load countries on mount
   useEffect(() => {
@@ -51,7 +57,7 @@ export function SearchForm() {
       }
 
       setIsLoadingCities(true);
-      setCity(""); // Reset city selection
+      setCity("");
       try {
         const response = await fetch(`/api/cities?country=${encodeURIComponent(country)}`);
         if (!response.ok) throw new Error('Failed to load cities');
@@ -73,109 +79,248 @@ export function SearchForm() {
     const params = new URLSearchParams();
     if (country) params.append("country", country);
     if (city) params.append("city", city);
-    if (dates) params.append("dates", dates);
-    if (nights) params.append("nights", nights);
+    if (dateFrom) params.append("dates", dateFrom);
+    if (nightsFrom) params.append("nights", nightsFrom);
     if (travelers) params.append("travelers", travelers);
 
     router.push(`/search?${params.toString()}`);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-lg shadow-lg p-6 space-y-4"
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="country" className="text-sm font-semibold text-gray-700">
-            Страна
-          </Label>
-          <Select value={country} onValueChange={setCountry} disabled={isLoadingCountries}>
-            <SelectTrigger id="country">
-              <SelectValue placeholder={isLoadingCountries ? "Загрузка..." : "Выберите страну"} />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="city" className="text-sm font-semibold text-gray-700">
-            Курорт
-          </Label>
-          <Select value={city} onValueChange={setCity} disabled={!country || isLoadingCities}>
-            <SelectTrigger id="city">
-              <SelectValue placeholder={isLoadingCities ? "Загрузка..." : "Выберите курорт"} />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dates" className="text-sm font-semibold text-gray-700">
-            Дата вылета
-          </Label>
-          <Input
-            id="dates"
-            type="date"
-            value={dates}
-            onChange={(e) => setDates(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
-            className="text-gray-900"
+    <div className="space-y-4">
+      {/* Search Type Radio Buttons */}
+      <div className="flex gap-6 text-white">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="searchType"
+            value="tours"
+            checked={searchType === "tours"}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="w-5 h-5 accent-white"
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="nights" className="text-sm font-semibold text-gray-700">
-            Количество ночей
-          </Label>
-          <Select value={nights} onValueChange={setNights}>
-            <SelectTrigger id="nights">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num} {num === 1 ? "ночь" : num < 5 ? "ночи" : "ночей"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="travelers" className="text-sm font-semibold text-gray-700">
-            Человек
-          </Label>
-          <Select value={travelers} onValueChange={setTravelers}>
-            <SelectTrigger id="travelers">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <span className="text-lg font-medium">Туры с перелетом</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="searchType"
+            value="hotels"
+            checked={searchType === "hotels"}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="w-5 h-5 accent-white"
+          />
+          <span className="text-lg font-medium">Отели</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="searchType"
+            value="hot"
+            checked={searchType === "hot"}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="w-5 h-5 accent-white"
+          />
+          <span className="text-lg font-medium">Горящие</span>
+        </label>
       </div>
 
-      <Button type="submit" className="w-full" size="lg">
-        Поиск туров
-      </Button>
-    </form>
+      {/* Main Search Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Primary Search Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+          {/* Departure City - Will show Astana by default */}
+          <div className="space-y-1">
+            <Label htmlFor="departure" className="text-xs text-gray-200">
+              Город вылета
+            </Label>
+            <Input
+              id="departure"
+              value="Астана"
+              disabled
+              className="bg-white text-gray-900 font-semibold h-12"
+            />
+          </div>
+
+          {/* Country */}
+          <div className="space-y-1">
+            <Label htmlFor="country" className="text-xs text-gray-200">
+              Страна
+            </Label>
+            <Select value={country} onValueChange={setCountry} disabled={isLoadingCountries}>
+              <SelectTrigger id="country" className="bg-white h-12 font-semibold">
+                <SelectValue placeholder={isLoadingCountries ? "Загрузка..." : "Выберите"} />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Dates */}
+          <div className="space-y-1">
+            <Label htmlFor="dateFrom" className="text-xs text-gray-200">
+              Даты вылета
+            </Label>
+            <Input
+              id="dateFrom"
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              className="bg-white text-gray-900 h-12"
+            />
+          </div>
+
+          {/* Nights Range */}
+          <div className="space-y-1">
+            <Label htmlFor="nights" className="text-xs text-gray-200">
+              Ночей
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={nightsFrom}
+                onChange={(e) => setNightsFrom(e.target.value)}
+                min="1"
+                max="30"
+                className="bg-white text-gray-900 h-12 w-20 font-semibold"
+              />
+              <span className="text-white">-</span>
+              <Input
+                type="number"
+                value={nightsTo}
+                onChange={(e) => setNightsTo(e.target.value)}
+                min="1"
+                max="30"
+                className="bg-white text-gray-900 h-12 w-20 font-semibold"
+              />
+            </div>
+          </div>
+
+          {/* Tourists */}
+          <div className="space-y-1">
+            <Label htmlFor="travelers" className="text-xs text-gray-200">
+              Туристы
+            </Label>
+            <Select value={travelers} onValueChange={setTravelers}>
+              <SelectTrigger id="travelers" className="bg-white h-12 font-semibold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num} {num === 1 ? "взрослый" : num < 5 ? "взрослых" : "взрослых"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Search Button */}
+          <div className="flex items-end">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full h-12 bg-[#FF6B47] hover:bg-[#FF5533] text-white font-bold text-lg"
+            >
+              🔍 Найти туры
+            </Button>
+          </div>
+        </div>
+
+        {/* Additional Filters Row */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {/* Hotel Class */}
+          <div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2.5 flex items-center justify-between cursor-pointer hover:bg-white/30 transition-colors">
+              <span className="text-white text-sm font-medium">Класс отеля</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-4 h-4 ${
+                      star <= hotelStars
+                        ? "fill-[#FF6B47] text-[#FF6B47]"
+                        : "text-white/50"
+                    } cursor-pointer`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHotelStars(star === hotelStars ? 0 : star);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Resort/Hotel */}
+          <div>
+            <Select value={city} onValueChange={setCity} disabled={!country || isLoadingCities}>
+              <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
+                <SelectValue placeholder={isLoadingCities ? "Загрузка..." : "Курорт / отель"} />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Meal Type */}
+          <div>
+            <Select>
+              <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
+                <SelectValue placeholder="Питание" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Любое</SelectItem>
+                <SelectItem value="bb">BB (завтрак)</SelectItem>
+                <SelectItem value="hb">HB (полупансион)</SelectItem>
+                <SelectItem value="fb">FB (полный пансион)</SelectItem>
+                <SelectItem value="ai">AI (все включено)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Rating */}
+          <div>
+            <Select>
+              <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
+                <SelectValue placeholder="Рейтинг" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Любой</SelectItem>
+                <SelectItem value="9">9+ Превосходно</SelectItem>
+                <SelectItem value="8">8+ Очень хорошо</SelectItem>
+                <SelectItem value="7">7+ Хорошо</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Advanced Filters */}
+          <div>
+            <Select>
+              <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
+                <SelectValue placeholder="Расширенные фильтры..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beach">У пляжа</SelectItem>
+                <SelectItem value="pool">Бассейн</SelectItem>
+                <SelectItem value="spa">СПА</SelectItem>
+                <SelectItem value="kids">Для детей</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
