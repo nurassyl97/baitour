@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "BaiTour - Откройте для себя удивительные туры по всему миру",
@@ -19,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         <nav className="border-b bg-gradient-to-r from-primary to-primary/90 shadow-md">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-white hover:text-[#FFC800] transition-colors">

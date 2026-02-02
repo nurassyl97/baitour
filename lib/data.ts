@@ -1,5 +1,16 @@
 import toursData from "@/data/tours.json";
 
+export interface TourVariant {
+  id: string;
+  operator: string;
+  operatorId: number;
+  date: string;
+  nights: number;
+  meal?: string;
+  price: number;
+  currency: string;
+}
+
 export interface Tour {
   id: string;
   name: string;
@@ -24,18 +35,23 @@ export interface Tour {
   };
   maxGuests: number;
   minGuests: number;
+  variants?: TourVariant[]; // Tour variants for detail page
 }
 
 export interface SearchParams {
   country?: string;
   city?: string;
+  departureId?: number;
   nightsFrom?: number;
   nightsTo?: number;
   dateFrom?: string;
   dateTo?: string;
   adults?: number;
   children?: number;
+  childrenAges?: number[];
   hotelCategory?: number;
+  hotelRating?: number; // 0, 2, 3, 4, 5 (0=any, 2=3.0+, 3=3.5+, 4=4.0+, 5=4.5+)
+  meal?: number; // Meal type ID
   minPrice?: number;
   maxPrice?: number;
   sortBy?: 'price-asc' | 'price-desc' | 'rating' | 'duration';
@@ -46,11 +62,11 @@ export function getAllTours(): Tour[] {
 }
 
 export function getTourById(id: string): Tour | undefined {
-  return toursData.tours.find((tour) => tour.id === id) as Tour | undefined;
+  return getAllTours().find((tour) => tour.id === id);
 }
 
 export function getTourBySlug(slug: string): Tour | undefined {
-  return toursData.tours.find((tour) => tour.slug === slug) as Tour | undefined;
+  return getAllTours().find((tour) => tour.slug === slug);
 }
 
 export function searchTours(params: SearchParams): Tour[] {

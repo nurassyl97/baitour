@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,47 +26,103 @@ export function SearchForm() {
   const [travelers, setTravelers] = useState("2");
   const [countries, setCountries] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+  const [departures, setDepartures] = useState<{ id: number; name: string }[]>(
+    []
+  );
   const [isLoadingCountries, setIsLoadingCountries] = useState(false);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [isLoadingDepartures, setIsLoadingDepartures] = useState(false);
   const [hotelStars, setHotelStars] = useState<number>(0);
+  const [mealType, setMealType] = useState<string>("any");
+  const [hotelRating, setHotelRating] = useState<string>("any");
+  const [children, setChildren] = useState<string>("0");
+  const [countriesError, setCountriesError] = useState<string | null>(null);
+  const [departureId, setDepartureId] = useState<string>("");
 
-  // Load countries on mount
+  const loadCountries = useCallback(async () => {
+    setIsLoadingCountries(true);
+    setCountriesError(null);
+
+    try {
+      // Wait for API response - no timeout, no fallback
+      const response = await fetch("/api/countries");
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to load countries`);
+      }
+
+      const data = await response.json();
+
+      if (data.countries && data.countries.length > 0) {
+        setCountries(data.countries);
+      } else {
+        setCountries([]);
+        setCountriesError("Список стран пуст. Попробуйте позже.");
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("Failed to load countries from API:", message);
+      setCountries([]);
+      setCountriesError("Не удалось загрузить страны. Попробуйте снова.");
+    } finally {
+      setIsLoadingCountries(false);
+    }
+  }, []);
+
+  // Set default dates (tomorrow + 7 days) for better chances with trial API
   useEffect(() => {
-    async function loadCountries() {
-      setIsLoadingCountries(true);
-      
-      // Set a timeout to use fallback if API takes too long
-      const timeoutId = setTimeout(() => {
-        console.log('API timeout, using fallback countries');
-        setCountries([
-          'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
-          'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
-          'Марокко', 'Вьетнам', 'Черногория', 'Китай'
-        ]);
-        setIsLoadingCountries(false);
-      }, 5000); // 5 second timeout
-      
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const weekLater = new Date();
+    weekLater.setDate(weekLater.getDate() + 8);
+    
+    setDateFrom(tomorrow.toISOString().split('T')[0]);
+    setDateTo(weekLater.toISOString().split('T')[0]);
+  }, []);
+
+  // Load countries on mount - wait for API response (no timeout, no fallback)
+  useEffect(() => {
+    loadCountries();
+  }, [loadCountries]);
+
+  // Load departure cities on mount (Kazakhstan by default)
+  useEffect(() => {
+    async function loadDepartures() {
+      setIsLoadingDepartures(true);
       try {
-        const response = await fetch('/api/countries', { 
-          signal: AbortSignal.timeout(5000) 
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error('Failed to load countries');
+        const response = await fetch(
+          "/api/departures?departureCountryId=3"
+        );
+        if (!response.ok) {
+          throw new Error(
+            `HTTP ${response.status}: Failed to load departure cities`
+          );
+        }
         const data = await response.json();
-        setCountries(data.countries || []);
-        setIsLoadingCountries(false);
-      } catch (error) {
-        clearTimeout(timeoutId);
-        console.warn('Failed to load countries, using fallback:', error);
-        setCountries([
-          'Египет', 'Турция', 'ОАЭ', 'Таиланд', 'Мальдивы', 
-          'Шри-Ланка', 'Индия', 'Куба', 'Индонезия', 'Тунис',
-          'Марокко', 'Вьетнам', 'Черногория', 'Китай'
-        ]);
-        setIsLoadingCountries(false);
+        if (data.departures && data.departures.length > 0) {
+          setDepartures(data.departures);
+          // Set default departure to Almaty (27) if exists
+          const defaultDep = data.departures.find(
+            (d: { id: number }) => d.id === 27
+          );
+          if (defaultDep) {
+            setDepartureId(String(defaultDep.id));
+          }
+        } else {
+          setDepartures([]);
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(
+          "Failed to load departure cities from API:",
+          message
+        );
+        setDepartures([]);
+      } finally {
+        setIsLoadingDepartures(false);
       }
     }
-    loadCountries();
+    loadDepartures();
   }, []);
 
   // Load cities when country changes
@@ -80,12 +136,18 @@ export function SearchForm() {
       setIsLoadingCities(true);
       setCity("");
       try {
+        // Wait for API response - no timeout
         const response = await fetch(`/api/cities?country=${encodeURIComponent(country)}`);
-        if (!response.ok) throw new Error('Failed to load cities');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to load cities`);
+        }
+        
         const data = await response.json();
         setCities(data.cities || []);
-      } catch (error) {
-        console.error('Failed to load cities:', error);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('Failed to load cities:', message);
         setCities([]);
       } finally {
         setIsLoadingCities(false);
@@ -97,17 +159,41 @@ export function SearchForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Ensure dateTo is set - default to dateFrom + 7 days if not provided
+    let finalDateTo = dateTo;
+    if (!finalDateTo && dateFrom) {
+      const dateFromObj = new Date(dateFrom);
+      dateFromObj.setDate(dateFromObj.getDate() + 7);
+      finalDateTo = dateFromObj.toISOString().split('T')[0];
+    } else if (!finalDateTo) {
+      // If no dateFrom either, set both to default range
+      const today = new Date();
+      const sevenDaysLater = new Date();
+      sevenDaysLater.setDate(today.getDate() + 7);
+      const fourteenDaysLater = new Date();
+      fourteenDaysLater.setDate(today.getDate() + 14);
+      
+      // Set dateFrom if not set
+      if (!dateFrom) {
+        setDateFrom(sevenDaysLater.toISOString().split('T')[0]);
+      }
+      finalDateTo = fourteenDaysLater.toISOString().split('T')[0];
+    }
+    
     const params = new URLSearchParams();
     params.append("searchType", searchType);
+    if (departureId) params.append("departureId", departureId);
     if (country) params.append("country", country);
     if (city) params.append("city", city);
     if (dateFrom) params.append("dateFrom", dateFrom);
-    if (dateTo) params.append("dateTo", dateTo);
+    if (finalDateTo) params.append("dateTo", finalDateTo);
     params.append("nightsFrom", nightsFrom);
     params.append("nightsTo", nightsTo);
     params.append("adults", travelers);
-    params.append("children", "0");
+    params.append("children", children);
     if (hotelStars > 0) params.append("hotelStars", hotelStars.toString());
+    if (mealType !== "any") params.append("meal", mealType);
+    if (hotelRating !== "any") params.append("hotelRating", hotelRating);
 
     router.push(`/search?${params.toString()}`);
   };
@@ -154,18 +240,32 @@ export function SearchForm() {
       {/* Main Search Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Primary Search Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-          {/* Departure City - Will show Astana by default */}
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+          {/* Departure City */}
           <div className="space-y-1">
             <Label htmlFor="departure" className="text-xs text-gray-200">
               Город вылета
             </Label>
-            <Input
-              id="departure"
-              value="Астана"
-              disabled
-              className="bg-white text-gray-900 font-semibold h-12"
-            />
+            <Select
+              value={departureId}
+              onValueChange={setDepartureId}
+              disabled={isLoadingDepartures || departures.length === 0}
+            >
+              <SelectTrigger id="departure" className="bg-white h-12 font-semibold">
+                <SelectValue
+                  placeholder={
+                    isLoadingDepartures ? "Загрузка..." : "Выберите город"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {departures.map((d) => (
+                  <SelectItem key={d.id} value={String(d.id)}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Country */}
@@ -173,9 +273,21 @@ export function SearchForm() {
             <Label htmlFor="country" className="text-xs text-gray-200">
               Страна
             </Label>
-            <Select value={country} onValueChange={setCountry} disabled={isLoadingCountries}>
+            <Select
+              value={country}
+              onValueChange={setCountry}
+              disabled={isLoadingCountries || Boolean(countriesError)}
+            >
               <SelectTrigger id="country" className="bg-white h-12 font-semibold">
-                <SelectValue placeholder={isLoadingCountries ? "Загрузка..." : "Выберите"} />
+                <SelectValue
+                  placeholder={
+                    isLoadingCountries
+                      ? "Загрузка..."
+                      : countriesError
+                      ? "Ошибка загрузки"
+                      : "Выберите"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {countries.map((c) => (
@@ -185,6 +297,18 @@ export function SearchForm() {
                 ))}
               </SelectContent>
             </Select>
+            {countriesError && (
+              <div className="flex items-center justify-between text-xs text-red-200">
+                <span>{countriesError}</span>
+                <button
+                  type="button"
+                  onClick={loadCountries}
+                  className="underline hover:text-white"
+                >
+                  Повторить
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Date Range - Two separate fields like Tourvisor */}
@@ -197,19 +321,46 @@ export function SearchForm() {
                 id="dateFrom"
                 type="date"
                 value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
+                onChange={(e) => {
+                  const selectedDate = e.target.value;
+                  setDateFrom(selectedDate);
+                  // If dateTo is before the new dateFrom, update dateTo
+                  if (dateTo && dateTo < selectedDate) {
+                    const dateFromObj = new Date(selectedDate);
+                    dateFromObj.setDate(dateFromObj.getDate() + 7);
+                    setDateTo(dateFromObj.toISOString().split('T')[0]);
+                  } else if (!dateTo && selectedDate) {
+                    // Auto-set dateTo to dateFrom + 7 days if not set
+                    const dateFromObj = new Date(selectedDate);
+                    dateFromObj.setDate(dateFromObj.getDate() + 7);
+                    setDateTo(dateFromObj.toISOString().split('T')[0]);
+                  }
+                }}
                 min={new Date().toISOString().split("T")[0]}
                 placeholder="От"
                 className="bg-white text-gray-900 h-12 flex-1"
+                required
               />
               <Input
                 id="dateTo"
                 type="date"
                 value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
+                onChange={(e) => {
+                  const selectedDate = e.target.value;
+                  // Ensure dateTo is after dateFrom
+                  if (dateFrom && selectedDate < dateFrom) {
+                    // If dateTo is before dateFrom, set it to dateFrom + 1 day
+                    const dateFromObj = new Date(dateFrom);
+                    dateFromObj.setDate(dateFromObj.getDate() + 1);
+                    setDateTo(dateFromObj.toISOString().split('T')[0]);
+                  } else {
+                    setDateTo(selectedDate);
+                  }
+                }}
                 min={dateFrom || new Date().toISOString().split("T")[0]}
                 placeholder="До"
                 className="bg-white text-gray-900 h-12 flex-1"
+                required
               />
             </div>
           </div>
@@ -243,7 +394,7 @@ export function SearchForm() {
           {/* Tourists */}
           <div className="space-y-1">
             <Label htmlFor="travelers" className="text-xs text-gray-200">
-              Туристы
+              Взрослые
             </Label>
             <Select value={travelers} onValueChange={setTravelers}>
               <SelectTrigger id="travelers" className="bg-white h-12 font-semibold">
@@ -253,6 +404,25 @@ export function SearchForm() {
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                   <SelectItem key={num} value={num.toString()}>
                     {num} {num === 1 ? "взрослый" : num < 5 ? "взрослых" : "взрослых"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Children */}
+          <div className="space-y-1">
+            <Label htmlFor="children" className="text-xs text-gray-200">
+              Дети
+            </Label>
+            <Select value={children} onValueChange={setChildren}>
+              <SelectTrigger id="children" className="bg-white h-12 font-semibold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[0, 1, 2, 3, 4].map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num === 0 ? "Нет" : `${num} ${num === 1 ? "ребенок" : num < 5 ? "ребенка" : "детей"}`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -314,31 +484,32 @@ export function SearchForm() {
 
           {/* Meal Type */}
           <div>
-            <Select>
+            <Select value={mealType} onValueChange={setMealType}>
               <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
                 <SelectValue placeholder="Питание" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Любое</SelectItem>
-                <SelectItem value="bb">BB (завтрак)</SelectItem>
-                <SelectItem value="hb">HB (полупансион)</SelectItem>
-                <SelectItem value="fb">FB (полный пансион)</SelectItem>
-                <SelectItem value="ai">AI (все включено)</SelectItem>
+                <SelectItem value="1">BB (завтрак)</SelectItem>
+                <SelectItem value="2">HB (полупансион)</SelectItem>
+                <SelectItem value="3">FB (полный пансион)</SelectItem>
+                <SelectItem value="4">AI (все включено)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Rating */}
+          {/* Hotel Rating */}
           <div>
-            <Select>
+            <Select value={hotelRating} onValueChange={setHotelRating}>
               <SelectTrigger className="bg-white/20 backdrop-blur-sm text-white border-none h-10 hover:bg-white/30 transition-colors">
-                <SelectValue placeholder="Рейтинг" />
+                <SelectValue placeholder="Рейтинг отеля" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Любой</SelectItem>
-                <SelectItem value="9">9+ Превосходно</SelectItem>
-                <SelectItem value="8">8+ Очень хорошо</SelectItem>
-                <SelectItem value="7">7+ Хорошо</SelectItem>
+                <SelectItem value="5">4.5+ Превосходно</SelectItem>
+                <SelectItem value="4">4.0+ Очень хорошо</SelectItem>
+                <SelectItem value="3">3.5+ Хорошо</SelectItem>
+                <SelectItem value="2">3.0+ Удовлетворительно</SelectItem>
               </SelectContent>
             </Select>
           </div>

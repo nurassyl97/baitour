@@ -1,7 +1,9 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getTourById, getAllTours } from "@/lib/data";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,12 +11,11 @@ import {
   Star,
   MapPin,
   Clock,
-  Users,
   Check,
   X,
   Hotel,
 } from "lucide-react";
-import type { Metadata } from "next";
+import type { Tour } from "@/lib/data";
 
 interface TourPageProps {
   params: Promise<{
@@ -22,88 +23,97 @@ interface TourPageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  const tours = getAllTours();
-  return tours.map((tour) => ({
-    id: tour.id,
-  }));
-}
+export default function TourPage({ params }: TourPageProps) {
+  const [tour, setTour] = useState<Tour | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
 
-export async function generateMetadata({
-  params,
-}: TourPageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  
-  // Clean the ID parameter - extract only the numeric part
-  if (!resolvedParams.id) {
-    return {
-      title: "Тур не найден",
-    };
+  useEffect(() => {
+    async function loadTour() {
+      const resolvedParams = await params;
+      
+      if (!resolvedParams?.id) {
+        notFound();
+        return;
+      }
+      
+      const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
+      
+      // Try localStorage first (with variants)
+      try {
+        const cached = localStorage.getItem('tourSearchResults');
+        if (cached) {
+          const tours: Tour[] = JSON.parse(cached);
+          const foundTour = tours.find(t => t.id === cleanId);
+          if (foundTour) {
+            console.log(`Found tour ${cleanId} in cache with ${foundTour.variants?.length || 0} variants`);
+            setTour(foundTour);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load from cache:', error);
+      }
+      
+      // Fallback to API
+      try {
+        const response = await fetch(`/api/tours/${cleanId}`);
+        if (!response.ok) {
+          notFound();
+          return;
+        }
+        const data = await response.json();
+        setTour(data);
+      } catch (error) {
+        console.error('Failed to load tour:', error);
+        notFound();
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadTour();
+  }, [params]);
+
+  const selectedVariant = useMemo(() => {
+    const variants = tour?.variants;
+    if (!variants || variants.length === 0) return null;
+
+    if (selectedVariantId) {
+      return variants.find((v) => v.id === selectedVariantId) ?? null;
+    }
+
+    return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0]);
+  }, [tour, selectedVariantId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    );
   }
-  
-  const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
-  const tour = getTourById(cleanId);
 
   if (!tour) {
-    return {
-      title: "Тур не найден",
-    };
-  }
-
-  return {
-    title: `${tour.name} - ${tour.city}, ${tour.country} | BaiTour`,
-    description: tour.description,
-    openGraph: {
-      title: tour.name,
-      description: tour.description,
-      images: [tour.image],
-    },
-  };
-}
-
-export default async function TourPage({ params }: TourPageProps) {
-  const resolvedParams = await params;
-  
-  // Clean the ID parameter - extract only the numeric part
-  if (!resolvedParams?.id) {
     notFound();
-  }
-  
-  const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
-  const tour = getTourById(cleanId);
-
-  if (!tour) {
-    notFound();
+    return null;
   }
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "TouristTrip",
-    name: tour.name,
-    description: tour.description,
-    image: tour.image,
-    offers: {
-      "@type": "Offer",
-      price: tour.price,
-      priceCurrency: tour.currency,
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: tour.rating,
-      reviewCount: tour.reviewCount,
-    },
-  };
+  const sidebarPrice = selectedVariant?.price ?? tour.price;
+  const sidebarCurrency = selectedVariant?.currency ?? tour.currency;
+  const sidebarDuration =
+    selectedVariant?.nights !== undefined && selectedVariant?.nights !== null
+      ? `${selectedVariant.nights + 1} дней / ${selectedVariant.nights} ночей`
+      : tour.duration;
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      
-      <div className="min-h-screen bg-gray-50">
-        {/* Image Gallery */}
-        <div className="relative h-[500px] w-full">
+    <div className="min-h-screen bg-gray-50">
+      {/* Image Gallery */}
+      <div className="relative h-[500px] w-full">
           <Image
             src={tour.image}
             alt={tour.name}
@@ -150,6 +160,74 @@ export default async function TourPage({ params }: TourPageProps) {
                 </CardContent>
               </Card>
 
+              {/* Tour Variants */}
+              {tour.variants && tour.variants.length > 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Варианты туров ({tour.variants.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-3 px-2">Оператор</th>
+                            <th className="text-left py-3 px-2">Дата вылета</th>
+                            <th className="text-left py-3 px-2">Ночей</th>
+                            <th className="text-left py-3 px-2">Питание</th>
+                            <th className="text-right py-3 px-2">Цена</th>
+                            <th className="text-right py-3 px-2"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tour.variants.map((variant, index) => (
+                            <tr
+                              key={variant.id || index}
+                              className={`border-b hover:bg-gray-50 ${
+                                selectedVariant?.id === variant.id ? "bg-blue-50" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-2 text-sm">{variant.operator}</td>
+                              <td className="py-3 px-2 text-sm">
+                                {variant.date ? new Date(variant.date).toLocaleDateString('ru-RU', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                }) : '—'}
+                              </td>
+                              <td className="py-3 px-2 text-sm">{variant.nights} ноч.</td>
+                              <td className="py-3 px-2 text-sm">{variant.meal || 'AI'}</td>
+                              <td className="py-3 px-2 text-right font-bold">
+                                {variant.price.toLocaleString()} {variant.currency === 'KZT' ? '₸' : variant.currency}
+                              </td>
+                              <td className="py-3 px-2 text-right">
+                                <Button
+                                  size="sm"
+                                  variant={selectedVariant?.id === variant.id ? "default" : "outline"}
+                                  onClick={() => setSelectedVariantId(variant.id)}
+                                >
+                                  {selectedVariant?.id === variant.id ? "Выбрано" : "Выбрать"}
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-yellow-50 border-yellow-200">
+                  <CardContent className="pt-6">
+                    <p className="text-center text-gray-700">
+                      ℹ️ Варианты туров с ценами доступны только на <Link href="/search" className="text-blue-600 hover:underline font-semibold">странице поиска</Link>.
+                      <br />
+                      <span className="text-sm text-gray-600">Пожалуйста, вернитесь к результатам поиска для выбора конкретного варианта.</span>
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Highlights */}
               <Card>
                 <CardHeader>
@@ -157,7 +235,7 @@ export default async function TourPage({ params }: TourPageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {tour.highlights.map((highlight, index) => (
+                    {(tour.highlights ?? []).map((highlight, index) => (
                       <li key={index} className="flex items-start">
                         <Check className="h-5 w-5 text-green-500 mr-3 mt-1 flex-shrink-0" />
                         <span>{highlight}</span>
@@ -177,7 +255,7 @@ export default async function TourPage({ params }: TourPageProps) {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {tour.included.map((item, index) => (
+                      {(tour.included ?? []).map((item, index) => (
                         <li key={index} className="flex items-start">
                           <Check className="h-4 w-4 text-green-500 mr-2 mt-1 flex-shrink-0" />
                           <span className="text-sm">{item}</span>
@@ -195,7 +273,7 @@ export default async function TourPage({ params }: TourPageProps) {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {tour.excluded.map((item, index) => (
+                      {(tour.excluded ?? []).map((item, index) => (
                         <li key={index} className="flex items-start">
                           <X className="h-4 w-4 text-red-500 mr-2 mt-1 flex-shrink-0" />
                           <span className="text-sm">{item}</span>
@@ -240,7 +318,7 @@ export default async function TourPage({ params }: TourPageProps) {
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2 mb-2">
                       <span className="text-4xl font-bold">
-                        ${tour.price}
+                        {sidebarPrice.toLocaleString()} {sidebarCurrency === 'KZT' ? '₸' : sidebarCurrency || '₸'}
                       </span>
                       <span className="text-muted-foreground">за человека</span>
                     </div>
@@ -252,7 +330,7 @@ export default async function TourPage({ params }: TourPageProps) {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between py-3 border-b">
                       <span className="text-muted-foreground">Продолжительность</span>
-                      <span className="font-semibold">{tour.duration}</span>
+                      <span className="font-semibold">{sidebarDuration}</span>
                     </div>
                     <div className="flex justify-between py-3 border-b">
                       <span className="text-muted-foreground">Размер группы</span>
@@ -269,7 +347,11 @@ export default async function TourPage({ params }: TourPageProps) {
                     </div>
                   </div>
 
-                  <Link href={`/booking?tourId=${tour.id}`}>
+                  <Link
+                    href={`/booking?tourId=${tour.id}${
+                      selectedVariant?.id ? `&variantId=${encodeURIComponent(selectedVariant.id)}` : ""
+                    }`}
+                  >
                     <Button size="lg" className="w-full mb-3">
                       Забронировать
                     </Button>
@@ -284,6 +366,5 @@ export default async function TourPage({ params }: TourPageProps) {
           </div>
         </div>
       </div>
-    </>
   );
 }

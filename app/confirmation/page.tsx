@@ -1,23 +1,50 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useMemo, useSyncExternalStore, Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckCircle, Download, Home } from "lucide-react";
 
+type BookingData = {
+  fullName: string;
+  email: string;
+  phone: string;
+  travelDate: string;
+  adults: string;
+  children: string;
+  specialRequests?: string;
+  agreeToTerms: boolean;
+  tourName?: string;
+  tourId?: string | null;
+  referenceNumber?: string;
+  submittedAt?: string;
+};
+
 function ConfirmationContent() {
   const searchParams = useSearchParams();
   const referenceNumber = searchParams.get("ref");
-  const [bookingData, setBookingData] = useState<any>(null);
 
-  useEffect(() => {
-    const data = localStorage.getItem("bookingData");
-    if (data) {
-      setBookingData(JSON.parse(data));
+  const bookingDataRaw = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("storage", onStoreChange);
+      return () => window.removeEventListener("storage", onStoreChange);
+    },
+    () => localStorage.getItem("bookingData"),
+    () => null
+  );
+
+  const bookingData = useMemo<BookingData | null>(() => {
+    if (!bookingDataRaw) return null;
+    try {
+      const parsed: unknown = JSON.parse(bookingDataRaw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed as BookingData;
+    } catch {
+      return null;
     }
-  }, []);
+  }, [bookingDataRaw]);
 
   if (!referenceNumber || !bookingData) {
     return (

@@ -5,12 +5,37 @@ import { SearchParams } from '@/lib/data';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { country, city, nights, minPrice, maxPrice, sortBy, travelers } = body;
+    const { 
+      country, 
+      city, 
+      departureId,
+      dateFrom, 
+      dateTo, 
+      nightsFrom, 
+      nightsTo, 
+      adults, 
+      children, 
+      hotelCategory,
+      hotelRating,
+      meal,
+      minPrice, 
+      maxPrice, 
+      sortBy 
+    } = body;
 
     const params: SearchParams = {
       country,
       city,
-      nights,
+      departureId,
+      dateFrom,
+      dateTo,
+      nightsFrom,
+      nightsTo,
+      adults,
+      children,
+      hotelCategory,
+      hotelRating,
+      meal,
       minPrice,
       maxPrice,
       sortBy,
@@ -22,10 +47,21 @@ export async function POST(request: Request) {
     const tours = await searchTours(params);
 
     return NextResponse.json({ tours });
-  } catch (error: any) {
-    console.error('Search API error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Search API error:', message);
+    
+    // Handle rate limiting with appropriate status code
+    if (message.includes('429') || message.includes('Too Many Requests')) {
+      return NextResponse.json(
+        { error: message || 'Too many requests to API. Please wait and try again.' },
+        { status: 429 }
+      );
+    }
+    
+    // Handle other errors
     return NextResponse.json(
-      { error: error.message || 'Failed to search tours' },
+      { error: message || 'Failed to search tours' },
       { status: 500 }
     );
   }

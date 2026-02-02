@@ -89,6 +89,7 @@ export interface TourvisorSearchRequest {
   hotelIds?: number[]; // Отели
   meal?: number; // Минимальный тип питания
   hotelCategory?: number; // Минимальная категория отеля (1-5)
+  hotelRating?: number; // Рейтинг отеля: 0=any, 2=3.0+, 3=3.5+, 4=4.0+, 5=4.5+
   priceFrom?: number;
   priceTo?: number;
   operatorIds?: number[];
@@ -215,6 +216,50 @@ export interface TourvisorSearchResult {
   isComplete: boolean;
   tours: TourvisorTour[];
   progress?: number;
+}
+
+// ============= Search Results (Hotels) =============
+// Response items from GET /tours/search/{searchId}
+export interface TourvisorSearchTour {
+  adults: number;
+  childs: number;
+  currency: string;
+  date: string;
+  flightNights: number;
+  flightPlace: number;
+  fuelCharge: number;
+  hotelPlace: number;
+  id: string;
+  isCharter: boolean;
+  isPromo: boolean;
+  meal: Meal;
+  name: string;
+  nights: number;
+  operator: Operator;
+  placement: string;
+  price: number;
+  roomType: string;
+}
+
+export interface TourvisorSearchHotel {
+  id: number;
+  name: string;
+  category: number;
+  country: Country;
+  region: Region;
+  subRegion?: SubRegion;
+  seaDistance?: number;
+  rating?: number;
+  price: number;
+  currency: string;
+  hotelDescription?: string;
+  hotelDescriptionLink?: string;
+  hasDescription?: boolean;
+  hasPictures?: boolean;
+  picturelink?: string;
+  latitude?: number;
+  longitude?: number;
+  tours?: TourvisorSearchTour[];
 }
 
 // ============= Hotel Description =============

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import { useMemo, useState, useSyncExternalStore, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { getTourById, type Tour } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ function BookingFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tourId = searchParams.get("tourId");
-  const [tour, setTour] = useState<Tour | null>(null);
+  const variantId = searchParams.get("variantId");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -30,12 +30,37 @@ function BookingFormContent() {
     agreeToTerms: false,
   });
 
-  useEffect(() => {
-    if (tourId) {
-      const foundTour = getTourById(tourId);
-      setTour(foundTour || null);
+  const cachedToursRaw = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("storage", onStoreChange);
+      return () => window.removeEventListener("storage", onStoreChange);
+    },
+    () => localStorage.getItem("tourSearchResults"),
+    () => null
+  );
+
+  const tour: Tour | null = useMemo(() => {
+    if (!tourId) return null;
+
+    if (cachedToursRaw) {
+      try {
+        const parsed: unknown = JSON.parse(cachedToursRaw);
+        if (Array.isArray(parsed)) {
+          const found = (parsed as Tour[]).find((t) => t.id === tourId);
+          if (found) return found;
+        }
+      } catch {
+        // ignore
+      }
     }
-  }, [tourId]);
+
+    return getTourById(tourId) ?? null;
+  }, [tourId, cachedToursRaw]);
+
+  const selectedVariant = useMemo(() => {
+    if (!variantId || !tour?.variants?.length) return null;
+    return tour.variants.find((v) => v.id === variantId) ?? null;
+  }, [tour, variantId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +78,8 @@ function BookingFormContent() {
           ...formData,
           tourName: tour?.name,
           tourId,
+          variantId: selectedVariant?.id ?? variantId ?? null,
+          variant: selectedVariant ?? null,
           referenceNumber,
           submittedAt: new Date().toISOString(),
         })
@@ -63,7 +90,7 @@ function BookingFormContent() {
 
       // Redirect to confirmation
       router.push(`/confirmation?ref=${referenceNumber}`);
-    } catch (error) {
+    } catch {
       alert("Произошла ошибка при отправке вашего бронирования. Пожалуйста, попробуйте снова.");
       setIsSubmitting(false);
     }
@@ -89,8 +116,14 @@ function BookingFormContent() {
     );
   }
 
+  const unitPrice = selectedVariant?.price ?? tour.price;
+  const currency = selectedVariant?.currency ?? tour.currency ?? "KZT";
+  const currencySymbol = currency === "KZT" ? "₸" : currency;
+
+  const formatMoney = (amount: number) =>
+    `${Math.round(amount).toLocaleString("ru-RU")} ${currencySymbol}`;
   const totalPrice =
-    tour.price * (parseInt(formData.adults) + parseInt(formData.children) * 0.7);
+    unitPrice * (parseInt(formData.adults) + parseInt(formData.children) * 0.7);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -301,19 +334,19 @@ function BookingFormContent() {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Взрослые ({formData.adults})</span>
-                    <span>${tour.price * parseInt(formData.adults)}</span>
+                    <span>{formatMoney(unitPrice * parseInt(formData.adults))}</span>
                   </div>
                   {parseInt(formData.children) > 0 && (
                     <div className="flex justify-between text-sm">
                       <span>Дети ({formData.children})</span>
                       <span>
-                        ${(tour.price * 0.7 * parseInt(formData.children)).toFixed(0)}
+                        {formatMoney(unitPrice * 0.7 * parseInt(formData.children))}
                       </span>
                     </div>
                   )}
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Итого</span>
-                    <span>${totalPrice.toFixed(0)}</span>
+                    <span>{formatMoney(totalPrice)}</span>
                   </div>
                 </div>
 

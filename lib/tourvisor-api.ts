@@ -15,10 +15,10 @@ import {
   CurrencyRate,
   TourvisorSearchRequest,
   TourvisorSearchResponse,
-  TourvisorSearchResult,
   TourvisorTour,
   TourvisorHotelDescription,
   TourvisorHotTour,
+  TourvisorSearchHotel,
 } from './tourvisor-types';
 import { tourvisorCache } from './tourvisor-cache';
 
@@ -30,6 +30,10 @@ const DEFAULT_DEPARTURE_ID = parseInt(process.env.NEXT_PUBLIC_DEFAULT_DEPARTURE_
 // Sleep helper
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 /**
  * Generic API fetch with Tourvisor authentication
  */
@@ -39,14 +43,17 @@ async function tourvisorFetch<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  console.log(`[Tourvisor API] Calling: ${options.method || 'GET'} ${url}`);
+  if (options.body) {
+    console.log(`[Tourvisor API] Body:`, options.body);
+  }
+  
+  const headers = new Headers(options.headers);
+  headers.set('Content-Type', 'application/json');
 
   // Add JWT token
   if (API_KEY) {
-    headers['Authorization'] = `Bearer ${API_KEY}`;
+    headers.set('Authorization', `Bearer ${API_KEY}`);
   }
 
   const response = await fetch(url, {
@@ -56,10 +63,29 @@ async function tourvisorFetch<T>(
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error(`[Tourvisor API] Error ${response.status}: ${errorText}`);
+    console.error(`[Tourvisor API] Full URL was: ${url}`);
     throw new Error(`Tourvisor API Error: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
-  return await response.json();
+  const responseData = await response.json();
+  const isArray = Array.isArray(responseData);
+  const preview = (() => {
+    if (!isArray) return JSON.stringify(responseData).substring(0, 300);
+
+    const arr = responseData as unknown[];
+    const first = arr[0];
+    if (!first || typeof first !== 'object') return `Array[${arr.length}]`;
+
+    const rec = first as Record<string, unknown>;
+    const keys = Object.keys(rec).slice(0, 15).join(',');
+    const sampleId = typeof rec.id === 'number' || typeof rec.id === 'string' ? String(rec.id) : 'n/a';
+    const sampleName = typeof rec.name === 'string' ? rec.name : 'n/a';
+    return `Array[${arr.length}] keys=[${keys}] sampleId=${sampleId} sampleName=${JSON.stringify(sampleName)}`;
+  })();
+  console.log(`[Tourvisor API] Success ${response.status}: ${preview}`);
+  
+  return responseData;
 }
 
 /**
@@ -73,16 +99,25 @@ async function tourvisorFetchWithRetry<T>(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await tourvisorFetch<T>(endpoint, options);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = toError(error);
+      const message = err.message;
       // Rate limit hit (429)
-      if (error.message?.includes('429')) {
-        console.warn(`Rate limit hit, waiting 60 seconds... (attempt ${attempt + 1}/${maxRetries})`);
-        await sleep(60000); // Wait 1 minute
-        continue;
+      if (message.includes('429') || message.includes('Too Many Requests')) {
+        if (attempt < maxRetries - 1) {
+          // For trial API: wait longer (60 seconds) to avoid hitting limits
+          const waitTime = 60;
+          console.warn(`Rate limit hit (trial API), waiting ${waitTime} seconds... (attempt ${attempt + 1}/${maxRetries})`);
+          await sleep(waitTime * 1000);
+          continue;
+        } else {
+          // Last attempt failed - throw error so user knows
+          throw new Error('Tourvisor API Error: 429 Too Many Requests - Пожалуйста, подождите минуту перед следующим поиском');
+        }
       }
 
       // Server error (5xx) - retry with exponential backoff
-      if (error.message?.includes('50')) {
+      if (message.includes('50')) {
         const delay = 1000 * Math.pow(2, attempt);
         console.warn(`Server error, retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries})`);
         await sleep(delay);
@@ -91,7 +126,7 @@ async function tourvisorFetchWithRetry<T>(
 
       // Last attempt or non-retryable error
       if (attempt === maxRetries - 1) {
-        throw error;
+        throw err;
       }
 
       // Generic retry with delay
@@ -132,7 +167,7 @@ export async function getCountries(departureId?: number, onlyCharter?: boolean):
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
     return await tourvisorFetchWithRetry<Country[]>(`/countries${queryString}`);
-  }, 1440);
+  }, 10080); // Cache for 7 days (trial API optimization - minimize requests)
 }
 
 /**
@@ -162,7 +197,7 @@ export async function getRegions(countryId?: number): Promise<Region[]> {
   return tourvisorCache.getOrFetch(cacheKey, async () => {
     const params = countryId ? `?countryId=${countryId}` : '';
     return await tourvisorFetchWithRetry<Region[]>(`/regions${params}`);
-  }, 1440);
+  }, 10080); // Cache for 7 days (trial API optimization - minimize requests)
 }
 
 /**
@@ -239,6 +274,9 @@ export async function getCurrencyRates(): Promise<CurrencyRate[]> {
  * Returns searchId for polling results
  */
 export async function startTourSearch(params: TourvisorSearchRequest): Promise<string> {
+  // For trial API: add small delay to avoid hitting rate limits
+  await sleep(1000); // Wait 1 second before search request
+  
   console.log('Starting tour search with params:', params);
   console.log('Date values - dateFrom:', params.dateFrom, 'dateTo:', params.dateTo);
   
@@ -251,11 +289,12 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     // API expects singular countryId, take first one
     queryParams.append('countryId', params.countryIds[0].toString());
   }
-  // Nights range - TESTING: Set both to same value
-  const nightsValue = params.nights.from; // Use nightsFrom value for both
-  queryParams.append('nightsFrom', nightsValue.toString());
-  queryParams.append('nightsTo', nightsValue.toString()); // Same as nightsFrom
-  console.log('Nights being sent (same value):', nightsValue);
+  // Nights range
+  const nightsFrom = params.nights.from;
+  const nightsTo = Math.max(params.nights.to, nightsFrom);
+  queryParams.append('nightsFrom', nightsFrom.toString());
+  queryParams.append('nightsTo', nightsTo.toString());
+  console.log('Nights range being sent:', { nightsFrom, nightsTo });
   queryParams.append('adults', params.adults.toString());
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
@@ -288,28 +327,33 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   console.log('Final dates being sent:', { finalDateFrom, finalDateTo });
   
   // Optional parameters
-  if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
-    queryParams.append('arrivalId', params.arrivalCityIds[0].toString());
-  }
-  if (params.priceFrom) {
+  // if (params.arrivalCityIds && params.arrivalCityIds.length > 0) {
+  //   queryParams.append('arrivalId', params.arrivalCityIds[0].toString());
+  // }
+  if (params.priceFrom !== undefined) {
     queryParams.append('priceFrom', params.priceFrom.toString());
   }
-  if (params.priceTo) {
+  if (params.priceTo !== undefined) {
     queryParams.append('priceTo', params.priceTo.toString());
   }
-  if (params.regionIds && params.regionIds.length > 0) {
-    params.regionIds.forEach(id => queryParams.append('regionIds', id.toString()));
-  }
-  if (params.meal) {
-    queryParams.append('meal', params.meal.toString());
-  }
-  if (params.hotelCategory) {
-    queryParams.append('hotelCategory', params.hotelCategory.toString());
-  }
+  // if (params.regionIds && params.regionIds.length > 0) {
+  //   params.regionIds.forEach(id => queryParams.append('regionIds', id.toString()));
+  // }
+  // if (params.meal) {
+  //   queryParams.append('meal', params.meal.toString());
+  // }
+  // if (params.hotelCategory) {
+  //   queryParams.append('hotelCategory', params.hotelCategory.toString());
+  // }
+  // if (params.hotelRating !== undefined && params.hotelRating > 0) {
+  //   queryParams.append('hotelRating', params.hotelRating.toString());
+  // }
   
-  const fullUrl = `/search?${queryParams.toString()}`;
+  // Correct endpoint path: /tours/search (not /search)
+  const fullUrl = `/tours/search?${queryParams.toString()}`;
   console.log('Calling Tourvisor API with URL:', fullUrl);
   console.log('Full query params:', queryParams.toString());
+  console.log('Base URL:', API_BASE_URL);
   
   const response = await tourvisorFetchWithRetry<TourvisorSearchResponse>(fullUrl, {
     method: 'GET',
@@ -321,9 +365,11 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
 /**
  * Get search results (получение результатов поиска)
  * @param searchId Search ID from startTourSearch
+ * @param limit Number of hotels with tours to return (default: 25)
+ * Note: API returns array of tours directly, not wrapped in an object
  */
-export async function getSearchResults(searchId: string): Promise<TourvisorSearchResult> {
-  return await tourvisorFetch<TourvisorSearchResult>(`/search/result?searchId=${searchId}`);
+export async function getSearchResults(searchId: string, limit: number = 25): Promise<TourvisorSearchHotel[]> {
+  return await tourvisorFetch<TourvisorSearchHotel[]>(`/tours/search/${searchId}?limit=${limit}`);
 }
 
 /**
@@ -331,7 +377,7 @@ export async function getSearchResults(searchId: string): Promise<TourvisorSearc
  * @param searchId Search ID from startTourSearch
  */
 export async function getSearchStatus(searchId: string): Promise<{ isComplete: boolean; progress?: number }> {
-  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/search/status?searchId=${searchId}`);
+  return await tourvisorFetch<{ isComplete: boolean; progress?: number }>(`/tours/search/${searchId}/status`);
 }
 
 /**
@@ -344,43 +390,50 @@ export async function pollSearchResults(
   searchId: string,
   maxAttempts: number = 30,
   onProgress?: (progress: number) => void
-): Promise<TourvisorTour[]> {
+): Promise<TourvisorSearchHotel[]> {
   let attempts = 0;
-  let delay = 1000; // Start with 1 second
-  let allTours: TourvisorTour[] = [];
+  let delay = 2000; // Start with 2 seconds (give search time to initialize)
+  const allTours: TourvisorSearchHotel[] = [];
 
   console.log(`Starting to poll search results for searchId: ${searchId}`);
+  
+  // Wait 3 seconds before first attempt (let search initialize)
+  console.log('Waiting 3 seconds for search to initialize...');
+  await sleep(3000);
 
   while (attempts < maxAttempts) {
     try {
-      const result = await getSearchResults(searchId);
+      onProgress?.(Math.min(99, Math.round((attempts / maxAttempts) * 100)));
+      const tours = await getSearchResults(searchId);
 
-      // Accumulate tours
-      if (result.tours && result.tours.length > 0) {
+      // API returns array directly - accumulate tours
+      if (tours && tours.length > 0) {
         // Add only new tours (avoid duplicates)
         const existingIds = new Set(allTours.map(t => t.id));
-        const newTours = result.tours.filter(t => !existingIds.has(t.id));
+        const newTours = tours.filter(t => !existingIds.has(t.id));
         allTours.push(...newTours);
-      }
-
-      // Update progress
-      if (result.progress !== undefined && onProgress) {
-        onProgress(result.progress);
-      }
-
-      // Check if complete
-      if (result.isComplete) {
+        
         console.log(`Search complete! Found ${allTours.length} tours`);
+        onProgress?.(100);
         return allTours;
       }
 
-      // Wait before next poll (exponential backoff up to 5 seconds)
+      // No tours yet - continue polling
       await sleep(delay);
       delay = Math.min(delay * 1.2, 5000);
       attempts++;
 
-    } catch (error) {
-      console.error(`Error polling search results (attempt ${attempts + 1}):`, error);
+    } catch (error: unknown) {
+      const err = toError(error);
+      console.error(`Error polling search results (attempt ${attempts + 1}):`, err);
+      
+      // If 404, search might not be ready yet - wait longer and retry
+      if (err.message.includes('404') && attempts < 5) {
+        console.log('Search not found (404) - waiting longer for initialization...');
+        await sleep(5000); // Wait 5 seconds for 404 errors
+        attempts++;
+        continue;
+      }
       
       // If we have some results, return them
       if (allTours.length > 0) {
@@ -390,7 +443,7 @@ export async function pollSearchResults(
 
       // Otherwise retry
       if (attempts >= maxAttempts - 1) {
-        throw error;
+        throw err;
       }
       await sleep(delay);
       delay = Math.min(delay * 1.5, 5000);
@@ -412,8 +465,8 @@ export async function pollSearchResults(
  * For extending search to more operators
  */
 export async function continueTourSearch(searchId: string): Promise<void> {
-  await tourvisorFetchWithRetry(`/search/continue?searchId=${searchId}`, {
-    method: 'POST',
+  await tourvisorFetchWithRetry(`/tours/search/${searchId}/continue`, {
+    method: 'GET',
   });
 }
 
@@ -421,8 +474,8 @@ export async function continueTourSearch(searchId: string): Promise<void> {
  * Get tour details (данные тура)
  * @param tourId Tour ID
  */
-export async function getTourDetails(tourId: string): Promise<TourvisorTour> {
-  return await tourvisorFetchWithRetry<TourvisorTour>(`/tours/${tourId}`);
+export async function getTourDetails(tourId: string, currency: string = 'KZT'): Promise<TourvisorTour> {
+  return await tourvisorFetchWithRetry<TourvisorTour>(`/tours/${tourId}?currency=${currency}`);
 }
 
 /**

@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { TourCard } from "@/components/tour-card";
-import { type Tour } from "@/lib/data";
+import { type SearchParams, type Tour } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,16 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { LoadingSpinner, LoadingCard } from "@/components/loading-spinner";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 function SearchResults() {
   const searchParams = useSearchParams();
   const [tours, setTours] = useState<Tour[]>([]);
-  const [sortBy, setSortBy] = useState<string>("rating");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+  const [sortBy, setSortBy] = useState<NonNullable<SearchParams["sortBy"]>>("rating");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 3000000]); // KZT range (max 3 mln)
   const [isLoading, setIsLoading] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
 
   useEffect(() => {
     async function performSearch() {
@@ -33,31 +34,70 @@ function SearchResults() {
 
       const country = searchParams.get("country") || undefined;
       const city = searchParams.get("city") || undefined;
-      const dateFrom = searchParams.get("dateFrom") || undefined;
-      const dateTo = searchParams.get("dateTo") || undefined;
+      const departureIdParam = searchParams.get("departureId");
+      let dateFrom = searchParams.get("dateFrom") || undefined;
+      let dateTo = searchParams.get("dateTo") || undefined;
       const nightsFromParam = searchParams.get("nightsFrom");
       const nightsToParam = searchParams.get("nightsTo");
       const adultsParam = searchParams.get("adults");
       const childrenParam = searchParams.get("children");
       const hotelStarsParam = searchParams.get("hotelStars");
+      const mealParam = searchParams.get("meal");
+      const hotelRatingParam = searchParams.get("hotelRating");
+
+      // Ensure dateTo is always set - default to dateFrom + 7 days if not provided
+      if (!dateTo && dateFrom) {
+        const dateFromObj = new Date(dateFrom);
+        dateFromObj.setDate(dateFromObj.getDate() + 7);
+        dateTo = dateFromObj.toISOString().split('T')[0];
+        console.log(`dateTo was missing, auto-set to: ${dateTo} (dateFrom + 7 days)`);
+      } else if (!dateTo && !dateFrom) {
+        // If both are missing, set default range
+        const today = new Date();
+        const sevenDaysLater = new Date();
+        sevenDaysLater.setDate(today.getDate() + 7);
+        const fourteenDaysLater = new Date();
+        fourteenDaysLater.setDate(today.getDate() + 14);
+        dateFrom = sevenDaysLater.toISOString().split('T')[0];
+        dateTo = fourteenDaysLater.toISOString().split('T')[0];
+        console.log(`Both dates missing, auto-set dateFrom: ${dateFrom}, dateTo: ${dateTo}`);
+      }
+
+      // Ensure dateTo is definitely set (safety check)
+      if (!dateTo) {
+        console.warn('dateTo is still undefined after checks, setting default');
+        if (dateFrom) {
+          const dateFromObj = new Date(dateFrom);
+          dateFromObj.setDate(dateFromObj.getDate() + 7);
+          dateTo = dateFromObj.toISOString().split('T')[0];
+        } else {
+          const fourteenDaysLater = new Date();
+          fourteenDaysLater.setDate(new Date().getDate() + 14);
+          dateTo = fourteenDaysLater.toISOString().split('T')[0];
+        }
+      }
 
       const params = {
         country,
         city,
+        departureId: departureIdParam ? parseInt(departureIdParam) : undefined,
         dateFrom,
-        dateTo,
+        dateTo, // This should always be set now
         nightsFrom: nightsFromParam ? parseInt(nightsFromParam) : undefined,
         nightsTo: nightsToParam ? parseInt(nightsToParam) : undefined,
         adults: adultsParam ? parseInt(adultsParam) : undefined,
         children: childrenParam ? parseInt(childrenParam) : undefined,
         hotelCategory: hotelStarsParam ? parseInt(hotelStarsParam) : undefined,
+        hotelRating: hotelRatingParam && hotelRatingParam !== "any" ? parseInt(hotelRatingParam) : undefined,
+        meal: mealParam && mealParam !== "any" ? parseInt(mealParam) : undefined,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
-        sortBy: sortBy as any,
-      };
+        sortBy,
+      } satisfies SearchParams;
 
       try {
         console.log('Calling search API with params:', params);
+        console.log('Date range:', { dateFrom: params.dateFrom, dateTo: params.dateTo });
         
         // Call our API route instead of searchTours directly
         const response = await fetch('/api/search', {
@@ -75,10 +115,44 @@ function SearchResults() {
 
         const data = await response.json();
         setTours(data.tours || []);
+        
+        // Save search results to localStorage for detail pages
+        try {
+          if (data.tours && data.tours.length > 0) {
+            localStorage.setItem('tourSearchResults', JSON.stringify(data.tours));
+          }
+        } catch (storageError) {
+          console.warn('Failed to save search results:', storageError);
+        }
+        
         setSearchProgress(100);
-      } catch (err: any) {
-        console.error('Search error:', err);
-        setError(err.message || 'Не удалось выполнить поиск. Попробуйте позже.');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('Search error:', message);
+        
+        // Handle rate limiting with a user-friendly message
+        if (message.includes('429') || message.includes('Too Many Requests')) {
+          const waitTime = 60; // Wait 60 seconds for trial API
+          setError(`Слишком много запросов к API (пробная версия). Пожалуйста, подождите ${waitTime} секунд и попробуйте снова.`);
+          setRetryAfter(waitTime);
+          
+          // Countdown timer
+          let remaining = waitTime;
+          const countdown = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+              setRetryAfter(remaining);
+            } else {
+              clearInterval(countdown);
+              setRetryAfter(null);
+              setError(null);
+            }
+          }, 1000);
+        } else if (message.includes('Не удалось найти страну') || message.includes('No valid country')) {
+          setError(message || 'Не удалось найти выбранную страну. Попробуйте позже.');
+        } else {
+          setError(message || 'Не удалось выполнить поиск. Попробуйте позже.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +189,13 @@ function SearchResults() {
             <div className="bg-white rounded-lg shadow p-6 sticky top-4 space-y-6">
               <div>
                 <h3 className="font-semibold mb-4">Сортировка</h3>
-                <Select value={sortBy} onValueChange={setSortBy} disabled={isLoading}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) =>
+                    setSortBy(value as NonNullable<SearchParams["sortBy"]>)
+                  }
+                  disabled={isLoading}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -131,15 +211,15 @@ function SearchResults() {
                 <div className="flex items-center justify-between mb-4">
                   <Label>Диапазон цен</Label>
                   <span className="text-sm text-muted-foreground">
-                    ${priceRange[0]} - ${priceRange[1]}
+                    {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₸
                   </span>
                 </div>
                 <Slider
                   value={priceRange}
                   onValueChange={(value) => setPriceRange(value as [number, number])}
                   min={0}
-                  max={5000}
-                  step={50}
+                  max={3000000}
+                  step={10000}
                   className="mb-2"
                   disabled={isLoading}
                 />
@@ -150,7 +230,7 @@ function SearchResults() {
                 className="w-full"
                 onClick={() => {
                   setSortBy("rating");
-                  setPriceRange([0, 5000]);
+                  setPriceRange([0, 3000000]);
                 }}
                 disabled={isLoading}
               >
@@ -188,7 +268,20 @@ function SearchResults() {
               <div className="bg-white rounded-lg shadow p-12 text-center">
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                   <p className="text-red-800 font-medium mb-2">Ошибка поиска</p>
-                  <p className="text-red-600 text-sm">{error}</p>
+                  <p className="text-red-600 text-sm mb-3">{error}</p>
+                  {retryAfter !== null && retryAfter > 0 && (
+                    <div className="mt-4">
+                      <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 border border-red-300">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-red-700 font-semibold">
+                          Повтор через: {retryAfter} сек
+                        </span>
+                      </div>
+                      <p className="text-xs text-red-500 mt-2">
+                        Пробная версия API имеет ограничения по количеству запросов
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

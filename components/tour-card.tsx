@@ -24,7 +24,7 @@ export function TourCard({ tour }: TourCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <Badge className="absolute top-2 right-2 bg-white text-black">
-            ${tour.price}
+            {tour.price.toLocaleString()} {tour.currency === 'KZT' ? '₸' : tour.currency || '₸'}
           </Badge>
         </div>
         
