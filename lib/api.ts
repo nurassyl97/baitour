@@ -399,10 +399,10 @@ export async function searchTours(
 
 /**
  * Submit booking request
- * API Endpoint: POST /bookings
+ * API Endpoint: POST /api/bookings (creates lead in Bitrix24)
  */
 export interface BookingRequest {
-  tourId: string;
+  tourId?: string;
   fullName: string;
   email: string;
   phone: string;
@@ -410,16 +410,41 @@ export interface BookingRequest {
   adults: number;
   children: number;
   specialRequests?: string;
+  tourName?: string;
+  variantId?: string;
+  price?: number;
+  currency?: string;
 }
 
-export async function submitBooking(booking: BookingRequest): Promise<{ success: boolean; bookingId?: string; message?: string }> {
-  // This project currently uses a client-side booking flow (localStorage + confirmation page).
-  // Keep a simple mocked server response here so the type-check/build is consistent.
-  console.log('Mock booking submitted:', booking);
+export async function submitBooking(booking: BookingRequest): Promise<{
+  success: boolean;
+  bookingId?: string;
+  referenceNumber?: string;
+  message?: string;
+  error?: string;
+}> {
+  const res = await fetch('/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...booking,
+      adults: String(booking.adults),
+      children: String(booking.children),
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return {
+      success: false,
+      message: typeof data.error === 'string' ? data.error : 'Не удалось отправить заявку.',
+      error: data.error,
+    };
+  }
   return {
     success: true,
-    bookingId: `MOCK-${Date.now()}`,
-    message: 'Бронирование успешно отправлено (mock)',
+    referenceNumber: data.referenceNumber,
+    bookingId: data.referenceNumber,
+    message: data.message ?? 'Заявка успешно отправлена',
   };
 }
 

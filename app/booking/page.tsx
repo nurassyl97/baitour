@@ -66,12 +66,39 @@ function BookingFormContent() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Generate reference number
-    const referenceNumber = `TR${Date.now()}`;
+    const unitPrice = selectedVariant?.price ?? tour?.price ?? 0;
+    const currency = selectedVariant?.currency ?? tour?.currency ?? "KZT";
 
-    // Simulate form submission (in production, this would send to Formspree or backend)
     try {
-      // Store in localStorage for confirmation page
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          travelDate: formData.travelDate,
+          adults: formData.adults,
+          children: formData.children,
+          specialRequests: formData.specialRequests || undefined,
+          tourId: tourId ?? undefined,
+          tourName: tour?.name ?? undefined,
+          variantId: selectedVariant?.id ?? variantId ?? undefined,
+          price: unitPrice ? Math.round(unitPrice) : undefined,
+          currency: currency ?? undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      const referenceNumber = data.referenceNumber ?? `TR${Date.now()}`;
+
+      if (!res.ok) {
+        const message = typeof data.error === "string" ? data.error : "Не удалось отправить заявку. Попробуйте позже или свяжитесь с нами по телефону.";
+        alert(message);
+        setIsSubmitting(false);
+        return;
+      }
+
       localStorage.setItem(
         "bookingData",
         JSON.stringify({
@@ -85,13 +112,9 @@ function BookingFormContent() {
         })
       );
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Redirect to confirmation
       router.push(`/confirmation?ref=${referenceNumber}`);
     } catch {
-      alert("Произошла ошибка при отправке вашего бронирования. Пожалуйста, попробуйте снова.");
+      alert("Не удалось отправить заявку. Попробуйте позже или свяжитесь с нами по телефону.");
       setIsSubmitting(false);
     }
   };
