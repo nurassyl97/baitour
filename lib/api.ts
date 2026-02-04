@@ -98,12 +98,33 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
   };
 
   // Map country name to ID
+  let countryId: number | null = null;
   if (params.country) {
-    const countryId = await getCountryIdByName(params.country);
+    countryId = await getCountryIdByName(params.country);
     if (countryId) {
       tourvisorParams.countryIds = [countryId];
     } else {
       console.warn(`Country "${params.country}" not found in Tourvisor`);
+    }
+  }
+
+  // Map city (курорт) to region ID — только если выбран конкретный курорт, не "Все курорты"
+  const cityAllValues = ['', '__all__', 'все курорты', 'любой курорт'];
+  const cityNormalized = (params.city || '').trim().toLowerCase();
+  if (countryId && params.city && !cityAllValues.includes(cityNormalized)) {
+    try {
+      const regions = await tourvisorApi.getRegions(countryId);
+      const region = regions.find(
+        (r) => r.name.toLowerCase().trim() === (params.city || '').toLowerCase().trim()
+      );
+      if (region) {
+        tourvisorParams.regionIds = [region.id];
+        console.log(`Region "${params.city}" mapped to ID ${region.id}`);
+      } else {
+        console.warn(`City/region "${params.city}" not found in Tourvisor for country ID ${countryId}`);
+      }
+    } catch (err) {
+      console.warn('Failed to resolve region for city:', params.city, err);
     }
   }
 
@@ -151,6 +172,76 @@ export async function getAllTours(): Promise<Tour[]> {
 }
 
 /**
+ * Normalized hotel images from Tourvisor hotel description API.
+ * Photos come ONLY from GET /hotels/{hotelId} (описания отелей), not from search API.
+ */
+export interface HotelImages {
+  hotelId: number;
+  images: string[];
+}
+
+function fixImageUrlForPhotos(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('//')) return `https:${url}`;
+  if (url.startsWith('http')) return url;
+  return `https:${url}`;
+}
+
+/**
+ * Fetch all hotel images from Tourvisor hotel description API.
+ * API may return "photos" or "images"; we merge both to get maximum pictures.
+ */
+export async function fetchHotelImages(hotelId: number): Promise<HotelImages> {
+  const desc = await tourvisorApi.getHotelDescription(hotelId);
+  const photos = desc.photos ?? [];
+  const imagesField = desc.images ?? [];
+  const merged = [...photos, ...imagesField];
+  const seen = new Set<string>();
+  const raw = merged.filter((url) => {
+    const u = (url || '').trim();
+    if (!u || seen.has(u)) return false;
+    seen.add(u);
+    return true;
+  });
+  const images = raw.map(fixImageUrlForPhotos).filter(Boolean);
+  return { hotelId, images };
+}
+
+const HOTEL_PHOTOS_CONCURRENCY = 5;
+
+/**
+ * Enrich tours with hotel photos from hotel description API.
+ * Search API only provides one picturelink (preview); full gallery comes from GET /hotels/{id}.
+ */
+async function enrichToursWithHotelPhotos(tours: Tour[]): Promise<Tour[]> {
+  const uniqueIds = [...new Set(tours.map((t) => parseInt(t.id, 10)).filter(Number.isFinite))];
+  if (uniqueIds.length === 0) return tours;
+
+  const map = new Map<number, string[]>();
+
+  for (let i = 0; i < uniqueIds.length; i += HOTEL_PHOTOS_CONCURRENCY) {
+    const chunk = uniqueIds.slice(i, i + HOTEL_PHOTOS_CONCURRENCY);
+    const results = await Promise.allSettled(chunk.map(fetchHotelImages));
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value.images.length > 0) {
+        map.set(result.value.hotelId, result.value.images);
+      }
+    }
+  }
+
+  for (const tour of tours) {
+    const hid = parseInt(tour.id, 10);
+    const images = map.get(hid);
+    if (images && images.length > 0) {
+      tour.image = images[0];
+      tour.images = images;
+    }
+  }
+
+  return tours;
+}
+
+/**
  * Get tour by ID
  */
 export async function getTourById(id: string): Promise<Tour | undefined> {
@@ -184,13 +275,17 @@ export async function getTourById(id: string): Promise<Tour | undefined> {
       return `https:${url}`;
     };
     
-    const mainImage = hotelDescription.photos && hotelDescription.photos.length > 0
-      ? fixImageUrl(hotelDescription.photos[0])
-      : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
-    
-    const images = hotelDescription.photos && hotelDescription.photos.length > 0
-      ? hotelDescription.photos.slice(0, 5).map(fixImageUrl)
-      : [mainImage, mainImage, mainImage];
+    const allUrls = [
+      ...(hotelDescription.photos ?? []),
+      ...(hotelDescription.images ?? []),
+    ];
+    const uniqueUrls = [...new Set(allUrls.filter(Boolean))];
+    const mainImage =
+      uniqueUrls.length > 0
+        ? fixImageUrl(uniqueUrls[0])
+        : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
+    const images =
+      uniqueUrls.length > 0 ? uniqueUrls.map(fixImageUrl) : [mainImage];
     
     const tour: Tour = {
       id: id,
@@ -274,25 +369,28 @@ export async function searchTours(
     const tourvisorHotels = await tourvisorApi.pollSearchResults(searchId, 30, onProgress);
     console.log(`Found ${tourvisorHotels.length} hotels from Tourvisor`);
 
-    // Transform to our format
+    // Transform to our format (search API gives only one picturelink per hotel)
     const tours = tourvisorAdapter.transformTours(tourvisorHotels, params);
+
+    // Enrich with full photo gallery from hotel description API (GET /hotels/{id})
+    const toursWithPhotos = await enrichToursWithHotelPhotos(tours);
 
     // Apply client-side sorting if specified
     if (params.sortBy) {
       switch (params.sortBy) {
         case 'price-asc':
-          tours.sort((a, b) => a.price - b.price);
+          toursWithPhotos.sort((a, b) => a.price - b.price);
           break;
         case 'price-desc':
-          tours.sort((a, b) => b.price - a.price);
+          toursWithPhotos.sort((a, b) => b.price - a.price);
           break;
         case 'rating':
-          tours.sort((a, b) => b.rating - a.rating);
+          toursWithPhotos.sort((a, b) => b.rating - a.rating);
           break;
       }
     }
 
-    return tours;
+    return toursWithPhotos;
   } catch (error) {
     console.error('Failed to search tours via Tourvisor:', error);
     throw error; // Re-throw to let caller handle the error

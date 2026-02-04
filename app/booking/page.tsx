@@ -98,7 +98,7 @@ function BookingFormContent() {
 
   if (!tour) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-[#F9FAFB] py-8">
         <div className="container mx-auto px-4">
           <Card>
             <CardContent className="p-12 text-center">
@@ -126,7 +126,7 @@ function BookingFormContent() {
     unitPrice * (parseInt(formData.adults) + parseInt(formData.children) * 0.7);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#F9FAFB] py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8">Завершите бронирование</h1>
 
@@ -366,7 +366,7 @@ function BookingFormContent() {
 export default function BookingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-[#F9FAFB] py-8">
         <div className="container mx-auto px-4">
           <div className="animate-pulse space-y-4">
             <div className="h-12 bg-gray-200 rounded w-1/3"></div>

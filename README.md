@@ -72,9 +72,17 @@ npm run dev
 ## Available Scripts
 
 - `npm run dev` - Start development server
+- `npm run dev:clean` - Remove dev lock and start dev server (use if «не грузит сайт» / port or lock conflict)
 - `npm run build` - Build for production
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint
+
+## Если сайт не грузится
+
+1. **Остановите все запущенные dev-серверы** (Ctrl+C в терминале, где был `npm run dev`).
+2. Запустите заново: `npm run dev:clean` (удалит lock и запустит сервер).
+3. Либо вручную: удалите папку `.next` (`rm -rf .next` или в проводнике), затем `npm run dev`.
+4. Откройте в браузере: **http://localhost:3000** (если порт занят, Next.js покажет другой, например 3001).
 
 ## Deployment
 

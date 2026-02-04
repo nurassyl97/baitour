@@ -1,370 +1,488 @@
-"use client";
+"use client"
 
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { notFound } from "next/navigation"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Star,
   MapPin,
-  Clock,
   Check,
-  X,
-  Hotel,
-} from "lucide-react";
-import type { Tour } from "@/lib/data";
+  ChevronRight,
+  Calendar,
+  Building2,
+  BedDouble,
+  UtensilsCrossed,
+  Headphones,
+  Info,
+  Plane,
+  Briefcase,
+  Shield,
+  Utensils,
+  Copy,
+} from "lucide-react"
+import { TourHeroGallery } from "@/components/tour/TourHeroGallery"
+import type { Tour } from "@/lib/data"
 
 interface TourPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>
+}
+
+function getHotelName(tour: Tour): string {
+  return tour.hotel?.name ?? tour.name.split(" - ")[0] ?? tour.name
+}
+
+function starCount(tour: Tour): number {
+  const r = tour.hotel?.rating ?? tour.rating
+  return Math.max(1, Math.min(5, Math.round(Number(r) || 4)))
 }
 
 export default function TourPage({ params }: TourPageProps) {
-  const [tour, setTour] = useState<Tour | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [tour, setTour] = useState<Tour | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"tours" | "about">("tours")
+  const [copyDone, setCopyDone] = useState(false)
 
   useEffect(() => {
     async function loadTour() {
-      const resolvedParams = await params;
-      
+      const resolvedParams = await params
       if (!resolvedParams?.id) {
-        notFound();
-        return;
+        notFound()
+        return
       }
-      
-      const cleanId = String(resolvedParams.id).split(/[\s(]/)[0];
-      
-      // Try localStorage first (with variants)
+      const cleanId = String(resolvedParams.id).split(/[\s(]/)[0]
       try {
-        const cached = localStorage.getItem('tourSearchResults');
+        const cached = localStorage.getItem("tourSearchResults")
         if (cached) {
-          const tours: Tour[] = JSON.parse(cached);
-          const foundTour = tours.find(t => t.id === cleanId);
+          const tours: Tour[] = JSON.parse(cached)
+          const foundTour = tours.find((t) => t.id === cleanId)
           if (foundTour) {
-            console.log(`Found tour ${cleanId} in cache with ${foundTour.variants?.length || 0} variants`);
-            setTour(foundTour);
-            setIsLoading(false);
-            return;
+            setTour(foundTour)
+            setIsLoading(false)
+            return
           }
         }
-      } catch (error) {
-        console.warn('Failed to load from cache:', error);
+      } catch {
+        // ignore
       }
-      
-      // Fallback to API
       try {
-        const response = await fetch(`/api/tours/${cleanId}`);
+        const response = await fetch(`/api/tours/${cleanId}`)
         if (!response.ok) {
-          notFound();
-          return;
+          notFound()
+          return
         }
-        const data = await response.json();
-        setTour(data);
-      } catch (error) {
-        console.error('Failed to load tour:', error);
-        notFound();
+        const data = await response.json()
+        setTour(data)
+      } catch {
+        notFound()
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    
-    loadTour();
-  }, [params]);
+    loadTour()
+  }, [params])
 
   const selectedVariant = useMemo(() => {
-    const variants = tour?.variants;
-    if (!variants || variants.length === 0) return null;
-
+    const variants = tour?.variants
+    if (!variants?.length) return null
     if (selectedVariantId) {
-      return variants.find((v) => v.id === selectedVariantId) ?? null;
+      return variants.find((v) => v.id === selectedVariantId) ?? null
     }
+    return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
+  }, [tour, selectedVariantId])
 
-    return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0]);
-  }, [tour, selectedVariantId]);
+  const copyLink = () => {
+    if (typeof window === "undefined") return
+    const url = window.location.href
+    navigator.clipboard.writeText(url).then(() => {
+      setCopyDone(true)
+      setTimeout(() => setCopyDone(false), 2000)
+    })
+  }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-[#22a7f0] border-t-transparent" />
           <p className="mt-4 text-gray-600">Загрузка...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!tour) {
-    notFound();
-    return null;
+    notFound()
+    return null
   }
 
-  const sidebarPrice = selectedVariant?.price ?? tour.price;
-  const sidebarCurrency = selectedVariant?.currency ?? tour.currency;
-  const sidebarDuration =
-    selectedVariant?.nights !== undefined && selectedVariant?.nights !== null
-      ? `${selectedVariant.nights + 1} дней / ${selectedVariant.nights} ночей`
-      : tour.duration;
+  const hotelName = getHotelName(tour)
+  const stars = starCount(tour)
+  const images = tour.images?.length ? tour.images : [tour.image]
+  const sidebarPrice = selectedVariant?.price ?? tour.price
+  const sidebarCurrency = selectedVariant?.currency ?? tour.currency
+  const reviewLabel =
+    tour.reviewCount === 1
+      ? "1 отзыв"
+      : tour.reviewCount >= 2 && tour.reviewCount <= 4
+        ? `${tour.reviewCount} отзыва`
+        : `${tour.reviewCount} отзывов`
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Image Gallery */}
-      <div className="relative h-[500px] w-full">
-          <Image
-            src={tour.image}
-            alt={tour.name}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <div className="container mx-auto">
-              <Badge className="mb-4 bg-white text-black">
-                {tour.country}
-              </Badge>
-              <h1 className="text-5xl font-bold mb-4">{tour.name}</h1>
-              <div className="flex flex-wrap gap-6 text-lg">
-                <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  {tour.city}, {tour.country}
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
-                  {tour.duration}
-                </div>
-                <div className="flex items-center">
-                  <Star className="h-5 w-5 mr-2 fill-yellow-400 text-yellow-400" />
-                  {tour.rating} ({tour.reviewCount} reviews)
-                </div>
+    <div className="min-h-screen bg-[#F9FAFB]">
+      <div className="container mx-auto px-4 py-6">
+        {/* Breadcrumbs */}
+        <nav className="mb-4 text-sm text-gray-600">
+          <Link href="/" className="text-[#22a7f0] hover:underline">
+            Главная
+          </Link>
+          <span className="mx-2">›</span>
+          <Link
+            href={`/search?country=${encodeURIComponent(tour.country)}`}
+            className="text-[#22a7f0] hover:underline"
+          >
+            {tour.country}
+          </Link>
+          <span className="mx-2">›</span>
+          <span className="text-gray-900">{hotelName}</span>
+        </nav>
+
+        {/* Hotel name + meta row + copy link */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+              {hotelName}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: stars }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className="size-4 fill-yellow-400 text-yellow-400"
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPin className="size-4 shrink-0" />
+                <span>
+                  {tour.city}
+                  {tour.hotel?.name ? `, ${tour.country}` : `, ${tour.country}`}
+                </span>
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-md bg-[#22a7f0] px-2 py-0.5 text-white">
+                <span className="font-semibold">
+                  {Number(tour.rating).toFixed(1)}/5
+                </span>
+                <span className="text-white/90">{reviewLabel}</span>
               </div>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 border-[#22a7f0] text-[#22a7f0] hover:bg-[#22a7f0]/10"
+            onClick={copyLink}
+          >
+            <Copy className="mr-2 size-4" />
+            {copyDone ? "Скопировано" : "Копировать ссылку"}
+          </Button>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Description */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>О туре</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg leading-relaxed">{tour.description}</p>
-                </CardContent>
-              </Card>
+        {/* Two columns */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Left column: gallery + tabs + content */}
+          <div className="lg:col-span-2 space-y-6">
+            <TourHeroGallery
+              images={images}
+              alt={hotelName}
+              maxThumbnails={6}
+            />
 
-              {/* Tour Variants */}
-              {tour.variants && tour.variants.length > 0 ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Варианты туров ({tour.variants.length})</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-3 px-2">Оператор</th>
-                            <th className="text-left py-3 px-2">Дата вылета</th>
-                            <th className="text-left py-3 px-2">Ночей</th>
-                            <th className="text-left py-3 px-2">Питание</th>
-                            <th className="text-right py-3 px-2">Цена</th>
-                            <th className="text-right py-3 px-2"></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tour.variants.map((variant, index) => (
-                            <tr
-                              key={variant.id || index}
-                              className={`border-b hover:bg-gray-50 ${
-                                selectedVariant?.id === variant.id ? "bg-blue-50" : ""
-                              }`}
+            {/* Tabs */}
+            <div className="border-b border-gray-200">
+              <div className="flex gap-6">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("tours")}
+                  className={`border-b-2 pb-3 text-sm font-medium transition-colors ${
+                    activeTab === "tours"
+                      ? "border-[#22a7f0] text-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Туры
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("about")}
+                  className={`border-b-2 pb-3 text-sm font-medium transition-colors ${
+                    activeTab === "about"
+                      ? "border-[#22a7f0] text-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Об отеле
+                </button>
+              </div>
+            </div>
+
+            {activeTab === "tours" && (
+              <div className="space-y-4">
+                {tour.variants && tour.variants.length > 0 ? (
+                  tour.variants.map((variant, index) => {
+                    const dateFrom = variant.date
+                      ? new Date(variant.date)
+                      : null
+                    const dateTo =
+                      dateFrom && variant.nights
+                        ? new Date(dateFrom)
+                        : null
+                    if (dateTo && variant.nights)
+                      dateTo.setDate(dateTo.getDate() + variant.nights)
+                    const dateStr =
+                      dateFrom && dateTo
+                        ? `${dateFrom.toLocaleDateString("ru-RU", {
+                            day: "numeric",
+                            month: "short",
+                          })} — ${dateTo.toLocaleDateString("ru-RU", {
+                            day: "numeric",
+                            month: "short",
+                          })} (${variant.nights} ночей)`
+                        : variant.date
+                          ? new Date(variant.date).toLocaleDateString("ru-RU")
+                          : "—"
+                    const isSelected = selectedVariant?.id === variant.id
+                    const priceSymbol =
+                      variant.currency === "KZT" ? "₸" : variant.currency
+                    return (
+                      <div
+                        key={variant.id || index}
+                        className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+                      >
+                        <div className="flex flex-col gap-4 md:flex-row md:items-stretch md:gap-0">
+                          {/* Left: room type + dates + occupancy */}
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <h3 className="font-semibold text-gray-900">
+                              Тур от {variant.operator}
+                            </h3>
+                            <div className="flex flex-col gap-1 text-sm text-gray-500">
+                              <span className="flex items-center gap-2">
+                                <Calendar className="size-4 shrink-0 text-gray-400" />
+                                {dateStr}
+                              </span>
+                              <span className="flex items-center gap-2">
+                                <BedDouble className="size-4 shrink-0 text-gray-400" />
+                                2 взр
+                              </span>
+                            </div>
+                          </div>
+                          {/* Middle: size, meal, operator + vertical separator */}
+                          <div className="flex flex-1 flex-col gap-1 border-gray-200 pl-0 text-sm text-gray-500 md:border-l md:pl-5">
+                            <span className="flex items-center gap-2">
+                              <Building2 className="size-4 shrink-0 text-gray-400" />
+                              Размер: —
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <UtensilsCrossed className="size-4 shrink-0 text-gray-400" />
+                              {variant.meal || "Только завтрак"}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <Headphones className="size-4 shrink-0 text-gray-400" />
+                              Туроператор {variant.operator}
+                            </span>
+                          </div>
+                          {/* Right: price + alternative link + button */}
+                          <div className="flex shrink-0 flex-col items-end justify-between gap-3 border-gray-200 pl-0 md:border-l md:pl-5">
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-gray-900">
+                                {variant.price.toLocaleString("ru-RU")}{" "}
+                                {priceSymbol}
+                              </div>
+                              <Link
+                                href="/search"
+                                className="mt-1 inline-flex items-center gap-1 text-sm text-[#22a7f0] hover:underline"
+                              >
+                                от других операторов
+                                <Info className="size-3.5 shrink-0" />
+                              </Link>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="w-full shrink-0 bg-[#22a7f0] px-4 py-2 font-medium text-white hover:bg-[#1b8fd8] md:w-auto"
+                              onClick={() => setSelectedVariantId(variant.id)}
                             >
-                              <td className="py-3 px-2 text-sm">{variant.operator}</td>
-                              <td className="py-3 px-2 text-sm">
-                                {variant.date ? new Date(variant.date).toLocaleDateString('ru-RU', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric'
-                                }) : '—'}
-                              </td>
-                              <td className="py-3 px-2 text-sm">{variant.nights} ноч.</td>
-                              <td className="py-3 px-2 text-sm">{variant.meal || 'AI'}</td>
-                              <td className="py-3 px-2 text-right font-bold">
-                                {variant.price.toLocaleString()} {variant.currency === 'KZT' ? '₸' : variant.currency}
-                              </td>
-                              <td className="py-3 px-2 text-right">
-                                <Button
-                                  size="sm"
-                                  variant={selectedVariant?.id === variant.id ? "default" : "outline"}
-                                  onClick={() => setSelectedVariantId(variant.id)}
-                                >
-                                  {selectedVariant?.id === variant.id ? "Выбрано" : "Выбрать"}
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="bg-yellow-50 border-yellow-200">
-                  <CardContent className="pt-6">
-                    <p className="text-center text-gray-700">
-                      ℹ️ Варианты туров с ценами доступны только на <Link href="/search" className="text-blue-600 hover:underline font-semibold">странице поиска</Link>.
-                      <br />
-                      <span className="text-sm text-gray-600">Пожалуйста, вернитесь к результатам поиска для выбора конкретного варианта.</span>
+                              {isSelected ? "Выбрано" : "Выбрать"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <Card className="border-amber-200 bg-amber-50/50">
+                    <CardContent className="py-6 text-center text-gray-700">
+                      Варианты туров с ценами доступны на{" "}
+                      <Link
+                        href="/search"
+                        className="font-semibold text-[#22a7f0] hover:underline"
+                      >
+                        странице поиска
+                      </Link>
+                      .
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {activeTab === "about" && (
+              <div className="space-y-6">
+                {tour.description && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>О туре</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="leading-relaxed text-gray-700">
+                        {tour.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+                {(tour.highlights?.length ?? 0) > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Основные моменты</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {tour.highlights!.map((h, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="mt-0.5 size-4 shrink-0 text-[#22a7f0]" />
+                            <span>{h}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Размещение</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="font-semibold text-gray-900">
+                      {tour.hotel.name}
                     </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Highlights */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Основные моменты тура</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {(tour.highlights ?? []).map((highlight, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check className="h-5 w-5 text-green-500 mr-3 mt-1 flex-shrink-0" />
-                        <span>{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* What's Included/Excluded */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-green-600">
-                      Что включено
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {(tour.included ?? []).map((item, index) => (
-                        <li key={index} className="flex items-start">
-                          <Check className="h-4 w-4 text-green-500 mr-2 mt-1 flex-shrink-0" />
-                          <span className="text-sm">{item}</span>
-                        </li>
+                    <div className="mt-2 flex items-center gap-1">
+                      <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                      <span>{tour.hotel.rating}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {tour.hotel.amenities.map((a, i) => (
+                        <span
+                          key={i}
+                          className="rounded-md bg-gray-100 px-2 py-1 text-sm text-gray-700"
+                        >
+                          {a}
+                        </span>
                       ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-red-600">
-                      Что не включено
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {(tour.excluded ?? []).map((item, index) => (
-                        <li key={index} className="flex items-start">
-                          <X className="h-4 w-4 text-red-500 mr-2 mt-1 flex-shrink-0" />
-                          <span className="text-sm">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
+            )}
+          </div>
 
-              {/* Hotel Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Hotel className="h-5 w-5 mr-2" />
-                    Размещение
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <h3 className="text-lg font-semibold mb-2">
-                    {tour.hotel.name}
-                  </h3>
-                  <div className="flex items-center mb-4">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                    <span className="font-semibold">{tour.hotel.rating}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {tour.hotel.amenities.map((amenity, index) => (
-                      <Badge key={index} variant="secondary">
-                        {amenity}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Booking Sidebar */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-4">
-                <CardContent className="p-6">
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-4xl font-bold">
-                        {sidebarPrice.toLocaleString()} {sidebarCurrency === 'KZT' ? '₸' : sidebarCurrency || '₸'}
-                      </span>
-                      <span className="text-muted-foreground">за человека</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      * Цена может меняться в зависимости от сезона и наличия мест
-                    </p>
-                  </div>
-
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Продолжительность</span>
-                      <span className="font-semibold">{sidebarDuration}</span>
-                    </div>
-                    <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Размер группы</span>
-                      <span className="font-semibold">
-                        {tour.minGuests}-{tour.maxGuests} человек
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-3 border-b">
-                      <span className="text-muted-foreground">Рейтинг</span>
-                      <span className="font-semibold flex items-center">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                        {tour.rating} ({tour.reviewCount})
-                      </span>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/booking?tourId=${tour.id}${
-                      selectedVariant?.id ? `&variantId=${encodeURIComponent(selectedVariant.id)}` : ""
-                    }`}
-                  >
-                    <Button size="lg" className="w-full mb-3">
-                      Забронировать
+          {/* Right sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-4">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Тур с перелетом от{" "}
+                    {sidebarPrice.toLocaleString("ru-RU")}{" "}
+                    {sidebarCurrency === "KZT" ? "₸" : sidebarCurrency}
+                  </h2>
+                  <Link href="/search" className="mt-3 block">
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#22a7f0] text-[#22a7f0] hover:bg-[#22a7f0]/10"
+                    >
+                      Посмотреть все туры
                     </Button>
                   </Link>
-                  
-                  <p className="text-xs text-center text-muted-foreground">
-                    Бесплатная отмена за 24 часа до отправления
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="mb-3 font-semibold text-gray-900">
+                    В стоимость тура входит:
+                  </h3>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-center gap-2">
+                      <Plane className="size-4 shrink-0 text-[#22a7f0]" />
+                      Перелет
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Briefcase className="size-4 shrink-0 text-[#22a7f0]" />
+                      Трансфер
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Shield className="size-4 shrink-0 text-[#22a7f0]" />
+                      Страховка
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Utensils className="size-4 shrink-0 text-[#22a7f0]" />
+                      Питание
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="mb-3 font-semibold text-gray-900">
+                    Услуги и удобства отеля
+                  </h3>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    {(tour.hotel.amenities ?? [])
+                      .slice(0, 5)
+                      .map((a, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <Check className="size-4 shrink-0 text-[#22a7f0]" />
+                          {a}
+                        </li>
+                      ))}
+                  </ul>
+                  {tour.hotel.amenities && tour.hotel.amenities.length > 5 && (
+                    <Link
+                      href="#"
+                      className="mt-2 inline-flex items-center gap-1 text-sm text-[#22a7f0] hover:underline"
+                    >
+                      Все услуги
+                      <ChevronRight className="size-4" />
+                    </Link>
+                  )}
+                </div>
+
+                <Link
+                  href={`/booking?tourId=${tour.id}${
+                    selectedVariant?.id
+                      ? `&variantId=${encodeURIComponent(selectedVariant.id)}`
+                      : ""
+                  }`}
+                  className="mt-6 block"
+                >
+                  <Button size="lg" className="w-full bg-[#22a7f0] hover:bg-[#1b8fd8]">
+                    Забронировать
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
-  );
+    </div>
+  )
 }

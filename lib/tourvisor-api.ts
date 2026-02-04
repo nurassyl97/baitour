@@ -299,25 +299,27 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
   
-  // Date range - BOTH are required
-  // Ensure dateFrom
+  // Date range - BOTH are required. API rejects past dates ("invalid dateFrom parameter").
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
   let finalDateFrom: string;
-  if (params.dateFrom) {
+  if (params.dateFrom && params.dateFrom >= todayStr) {
     finalDateFrom = params.dateFrom;
+  } else if (params.dateFrom) {
+    // dateFrom in the past — clamp to today
+    finalDateFrom = todayStr;
   } else {
-    // Default to 7 days from now
     const sevenDaysLater = new Date();
     sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
     finalDateFrom = sevenDaysLater.toISOString().split('T')[0];
   }
   queryParams.append('dateFrom', finalDateFrom);
-  
-  // Ensure dateTo - must be AFTER dateFrom
+
   let finalDateTo: string;
-  if (params.dateTo) {
+  if (params.dateTo && params.dateTo >= finalDateFrom) {
     finalDateTo = params.dateTo;
   } else {
-    // Default to dateFrom + 7 days (not 30 days from today)
     const dateFromObj = new Date(finalDateFrom);
     dateFromObj.setDate(dateFromObj.getDate() + 7);
     finalDateTo = dateFromObj.toISOString().split('T')[0];
@@ -336,19 +338,19 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   if (params.priceTo !== undefined) {
     queryParams.append('priceTo', params.priceTo.toString());
   }
-  // if (params.regionIds && params.regionIds.length > 0) {
-  //   params.regionIds.forEach(id => queryParams.append('regionIds', id.toString()));
-  // }
-  // if (params.meal) {
-  //   queryParams.append('meal', params.meal.toString());
-  // }
-  // if (params.hotelCategory) {
-  //   queryParams.append('hotelCategory', params.hotelCategory.toString());
-  // }
-  // if (params.hotelRating !== undefined && params.hotelRating > 0) {
-  //   queryParams.append('hotelRating', params.hotelRating.toString());
-  // }
-  
+  if (params.regionIds && params.regionIds.length > 0) {
+    params.regionIds.forEach(id => queryParams.append('regionIds', id.toString()));
+  }
+  if (params.meal) {
+    queryParams.append('meal', params.meal.toString());
+  }
+  if (params.hotelCategory) {
+    queryParams.append('hotelCategory', params.hotelCategory.toString());
+  }
+  if (params.hotelRating !== undefined && params.hotelRating > 0) {
+    queryParams.append('hotelRating', params.hotelRating.toString());
+  }
+
   // Correct endpoint path: /tours/search (not /search)
   const fullUrl = `/tours/search?${queryParams.toString()}`;
   console.log('Calling Tourvisor API with URL:', fullUrl);
@@ -365,10 +367,10 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
 /**
  * Get search results (получение результатов поиска)
  * @param searchId Search ID from startTourSearch
- * @param limit Number of hotels with tours to return (default: 25)
+ * @param limit Number of hotels with tours to return (default: 500 — увеличиваем для совпадения с результатами на сайте Tourvisor)
  * Note: API returns array of tours directly, not wrapped in an object
  */
-export async function getSearchResults(searchId: string, limit: number = 25): Promise<TourvisorSearchHotel[]> {
+export async function getSearchResults(searchId: string, limit: number = 500): Promise<TourvisorSearchHotel[]> {
   return await tourvisorFetch<TourvisorSearchHotel[]>(`/tours/search/${searchId}?limit=${limit}`);
 }
 
@@ -457,7 +459,9 @@ export async function pollSearchResults(
     return allTours;
   }
 
-  throw new Error(`Search timeout after ${maxAttempts} attempts with no results`);
+  // No results - treat as empty search (do not throw; UI can show "not found")
+  console.warn(`Search timeout after ${maxAttempts} attempts with no results`);
+  return [];
 }
 
 /**

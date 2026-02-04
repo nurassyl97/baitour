@@ -274,7 +274,10 @@ export interface TourvisorHotelDescription {
   longitude?: number;
   address?: string;
   description?: string;
+  /** Hotel photos (some API versions use this field) */
   photos?: string[];
+  /** Hotel images (API docs: GET /hotels/{hotelId} returns "images" array) */
+  images?: string[];
   amenities?: string[];
   country: Country;
   region: Region;

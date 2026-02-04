@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "BaiTour - Откройте для себя удивительные туры по всему миру",
@@ -15,10 +22,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru" className={inter.variable}>
       <body className="font-sans antialiased">
-        <nav className="border-b bg-gradient-to-r from-primary to-primary/90 shadow-md">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <nav className="border-b bg-gradient-to-r from-[#22a7f0] to-[#1b8fd8] shadow-md">
+          <div className="ds-container py-4 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-white hover:text-[#FFC800] transition-colors">
               <span className="text-white">BAI</span><span className="text-[#FFC800]">tour</span>
             </Link>
@@ -39,10 +46,10 @@ export default function RootLayout({
           </div>
         </nav>
 
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen bg-[#F9FAFB]">{children}</main>
 
         <footer className="bg-gray-900 text-white py-12 mt-12">
-          <div className="container mx-auto px-4">
+          <div className="ds-container">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-xl font-bold mb-4">BaiTour</h3>
