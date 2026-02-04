@@ -59,28 +59,38 @@ export function HotelImageSlideshow({
 
   if (count === 0) return null
 
-  const Wrapper = disableLink ? "div" : Link
+  const singleImage = (
+    <Image
+      src={images[0]}
+      alt={alt}
+      fill
+      className="object-cover transition-transform duration-300 hover:scale-[1.03]"
+      sizes={disableLink ? "100vw" : "(max-width: 768px) 100vw, 280px"}
+    />
+  )
 
   if (isSingle) {
+    if (disableLink) {
+      return (
+        <div className="relative block h-full w-full overflow-hidden">
+          {singleImage}
+        </div>
+      )
+    }
     return (
-      <Wrapper
-        {...(disableLink ? { className: "relative block h-full w-full overflow-hidden" } : { href: `/tour/${tourId}`, className: "relative block h-full w-full overflow-hidden rounded-[12px]", target: "_blank", rel: "noopener noreferrer" })}
+      <Link
+        href={`/tour/${tourId}`}
+        className="relative block h-full w-full overflow-hidden rounded-[12px]"
+        target="_blank"
+        rel="noopener noreferrer"
       >
-        <Image
-          src={images[0]}
-          alt={alt}
-          fill
-          className="object-cover transition-transform duration-300 hover:scale-[1.03]"
-          sizes={disableLink ? "100vw" : "(max-width: 768px) 100vw, 280px"}
-        />
-      </Wrapper>
+        {singleImage}
+      </Link>
     )
   }
 
-  return (
-    <Wrapper
-      {...(disableLink ? { className: `group relative block h-full w-full overflow-hidden ${className ?? ""}` } : { href: `/tour/${tourId}`, className: `group relative block h-full w-full overflow-hidden rounded-[12px] ${className ?? ""}`, target: "_blank", rel: "noopener noreferrer" })}
-    >
+  const carouselContent = (
+    <>
       {/* Track */}
       <div
         className="flex h-full w-full transition-transform duration-300 ease-out"
@@ -148,6 +158,24 @@ export function HotelImageSlideshow({
           />
         ))}
       </div>
-    </Wrapper>
+    </>
+  )
+
+  const carouselClassName = disableLink
+    ? `group relative block h-full w-full overflow-hidden ${className ?? ""}`
+    : `group relative block h-full w-full overflow-hidden rounded-[12px] ${className ?? ""}`
+
+  if (disableLink) {
+    return <div className={carouselClassName}>{carouselContent}</div>
+  }
+  return (
+    <Link
+      href={`/tour/${tourId}`}
+      className={carouselClassName}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {carouselContent}
+    </Link>
   )
 }
