@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { Header } from "@/components/Header";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -24,27 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={inter.variable}>
       <body className="font-sans antialiased">
-        <nav className="border-b bg-gradient-to-r from-[#22a7f0] to-[#1b8fd8] shadow-md">
-          <div className="ds-container py-4 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-white hover:text-[#FFC800] transition-colors">
-              <span className="text-white">BAI</span><span className="text-[#FFC800]">tour</span>
-            </Link>
-            <div className="flex gap-6 text-white font-medium">
-              <Link href="/" className="hover:text-[#FFC800] transition-colors">
-                Главная
-              </Link>
-              <Link href="/search" className="hover:text-[#FFC800] transition-colors">
-                Туры
-              </Link>
-              <Link href="/#about" className="hover:text-[#FFC800] transition-colors">
-                О нас
-              </Link>
-              <Link href="/#contact" className="hover:text-[#FFC800] transition-colors">
-                Контакты
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <Header />
 
         <main className="min-h-screen bg-[#F9FAFB]">{children}</main>
 

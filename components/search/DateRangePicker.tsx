@@ -87,6 +87,7 @@ export function DateRangePicker({
     const nextFrom = range?.from
     const nextTo = range?.to
 
+    // 1) Only start date chosen → keep calendar open (do not close)
     if (nextFrom && !nextTo) {
       onChange({
         dateFrom: toISO(nextFrom),
@@ -97,6 +98,7 @@ export function DateRangePicker({
       return
     }
 
+    // 2) Both dates chosen and end > start → update and close (range complete)
     if (nextFrom && nextTo) {
       const n = differenceInDays(nextTo, nextFrom)
       const safe = Number.isFinite(n) && n > 0 ? n : null
@@ -106,9 +108,12 @@ export function DateRangePicker({
         nightsFrom: safe,
         nightsTo: safe,
       })
+      // Auto-close only when range is complete (both dates, end after start)
+      if (safe != null) onOpenChange(false)
       return
     }
 
+    // 3) Clear selection
     onChange({ dateFrom: null, dateTo: null, nightsFrom: null, nightsTo: null })
   }
 

@@ -4,6 +4,7 @@ import * as React from "react"
 import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useMobile } from "@/lib/use-mobile"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 type Departure = { id: number; name: string }
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export function DeparturePicker({ value, open, onOpenChange, onChange }: Props) {
+  const isMobile = useMobile()
   const [departures, setDepartures] = React.useState<Departure[]>([])
   const [loading, setLoading] = React.useState(false)
 
@@ -73,7 +75,10 @@ export function DeparturePicker({ value, open, onOpenChange, onChange }: Props) 
               <button
                 key={d.id}
                 type="button"
-                onClick={() => onChange(d.id)}
+                onClick={() => {
+                  onChange(d.id)
+                  if (isMobile) onOpenChange(false)
+                }}
                 className={cn(
                   "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-gray-50",
                   isActive ? "bg-blue-50 font-semibold" : ""

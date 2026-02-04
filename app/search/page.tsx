@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/select";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { SearchBarSticky } from "@/components/search/SearchBarSticky";
+import { CompactSearchBar } from "@/components/search/CompactSearchBar";
+import { SearchModal } from "@/components/search/SearchModal";
 import { SearchLanding } from "@/components/search/SearchLanding";
+import { useMobile } from "@/lib/use-mobile";
 import { useSearchQuery } from "@/components/search/useSearchQuery";
 import {
   DEFAULT_DEPARTURE_ID,
@@ -96,6 +99,8 @@ function SearchResults() {
 
   const hasSearched = state.submit !== 0;
   const hasQuery = Boolean(state.country);
+  const isMobile = useMobile();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   useEffect(() => {
     async function performSearch() {
@@ -215,17 +220,47 @@ function SearchResults() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
-      <SearchBarSticky
-        state={state}
-        onPatch={(patch) => patchState(patch, { replace: true, scroll: false })}
-        onSubmit={handleSearchSubmit}
-      />
+    <div className="min-h-screen bg-[#F9FAFB] overflow-visible">
+      {/* Desktop: always full sticky bar. Mobile: landing = inline form; search = compact sticky bar */}
+      {!isMobile ? (
+        <SearchBarSticky
+          state={state}
+          onPatch={(patch) => patchState(patch, { replace: true, scroll: false })}
+          onSubmit={handleSearchSubmit}
+        />
+      ) : pageMode === "landing" ? (
+        <div className="md:hidden">
+          <SearchBarSticky
+            state={state}
+            onPatch={(patch) => patchState(patch, { replace: true, scroll: false })}
+            onSubmit={handleSearchSubmit}
+            sticky={false}
+          />
+        </div>
+      ) : (
+        <CompactSearchBar
+          state={state}
+          onEditClick={() => setIsSearchModalOpen(true)}
+        />
+      )}
+
+      {/* Mobile: Edit opens bottom sheet */}
+      {isMobile && (
+        <SearchModal
+          open={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+          state={state}
+          onPatch={(patch) => patchState(patch, { replace: true, scroll: false })}
+          onSubmit={handleSearchSubmit}
+        />
+      )}
 
       {pageMode === "landing" ? (
         <SearchLanding />
       ) : (
         <>
+          {/* Mobile: top padding under compact bar so content isn't hidden; desktop: no extra padding */}
+          <div className="pt-[var(--compact-bar-height)] md:pt-0">
           <div className="ds-container">
             <div className="mx-auto max-w-[var(--container-max)]">
               <FiltersRow state={state} />
@@ -337,6 +372,7 @@ function SearchResults() {
                 )}
               </div>
             </div>
+          </div>
           </div>
         </>
       )}

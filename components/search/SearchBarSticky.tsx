@@ -15,6 +15,8 @@ type Props = {
   onSubmit: () => void
   sticky?: boolean
   className?: string
+  /** Button label, e.g. "Найти туры" in modal */
+  submitLabel?: string
 }
 
 export function SearchBarSticky({
@@ -23,6 +25,7 @@ export function SearchBarSticky({
   onSubmit,
   sticky = true,
   className,
+  submitLabel = "Найти",
 }: Props) {
   const [active, setActive] = React.useState<
     null | "departure" | "destination" | "dates" | "people"
@@ -37,8 +40,9 @@ export function SearchBarSticky({
   return (
     <div
       className={cn(
-        sticky ? "sticky top-0 z-40" : "",
         sticky ? "bg-[#F9FAFB]" : "",
+        // Mobile: sticky — bar stays in place on page, then sticks to top when scrolled past; desktop: static
+        sticky ? "sticky top-0 z-40 pt-[env(safe-area-inset-top)] md:static md:pt-0" : "",
         className
       )}
     >
@@ -142,7 +146,7 @@ export function SearchBarSticky({
                   onClick={onSubmit}
                   className="h-full w-full rounded-none border-0 bg-primary hover:bg-primary/90 text-primary-foreground ds-button"
                 >
-                  Найти
+                  {submitLabel}
                 </Button>
               </div>
             </div>

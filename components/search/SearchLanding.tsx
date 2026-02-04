@@ -85,7 +85,7 @@ export function SearchLanding() {
             {POPULAR_DESTINATIONS.map((d) => (
               <Link
                 key={d.slug}
-                href={`/search?country=${encodeURIComponent(d.name)}&submit=${Date.now()}`}
+                href={`/search?country=${encodeURIComponent(d.name)}&submit=1`}
                 className="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-[#22a7f0] hover:bg-[#22a7f0]/5 hover:text-[#22a7f0] transition-colors"
               >
                 <Plane className="h-4 w-4" />

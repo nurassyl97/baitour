@@ -171,7 +171,11 @@ export function PeoplePicker({
           </button>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Готово
             </Button>
           </div>

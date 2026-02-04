@@ -8,6 +8,7 @@ import type { DateRange } from "react-day-picker"
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useMobile } from "@/lib/use-mobile"
 import { pluralRu } from "@/components/search/format"
 
 /* DESIGN STANDARDS (LOCKED) - Travel Date Range Calendar */
@@ -43,6 +44,7 @@ export function TravelDateCalendar({
   defaultMonth,
   className,
 }: TravelDateCalendarProps) {
+  const isMobile = useMobile()
   const [hoveredDate, setHoveredDate] = React.useState<Date | null>(null)
 
   const nights = React.useMemo(() => {
@@ -93,7 +95,7 @@ export function TravelDateCalendar({
       <DayPicker
         mode="range"
         locale={ru}
-        numberOfMonths={2}
+        numberOfMonths={isMobile ? 1 : 2}
         selected={showHoverPreview && hoverFrom && hoverTo ? { from: hoverFrom, to: hoverTo } : selected}
         onSelect={onSelect}
         fromDate={minDate}

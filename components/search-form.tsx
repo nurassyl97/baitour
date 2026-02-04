@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useMobile } from "@/lib/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,6 +38,7 @@ function formatShortDateRu(value: string): string {
 
 export function SearchForm({ variant = "default" }: { variant?: "default" | "compact" }) {
   const isCompact = variant === "compact";
+  const isMobile = useMobile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchType, setSearchType] = useState("tours");
   const [country, setCountry] = useState("");
@@ -413,6 +415,7 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
                                 onClick={() => {
                                   setCountry(c);
                                   setCity(CITY_ALL);
+                                  if (isMobile) setOpenDestination(false);
                                 }}
                                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
                                   active ? "bg-gray-100 font-semibold" : "hover:bg-gray-50"
@@ -459,7 +462,10 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
                         <div className="max-h-72 overflow-auto">
                           <button
                             type="button"
-                            onClick={() => setCity(CITY_ALL)}
+                            onClick={() => {
+                              setCity(CITY_ALL);
+                              if (isMobile) setOpenDestination(false);
+                            }}
                             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
                               city === CITY_ALL ? "bg-blue-50 font-semibold" : "hover:bg-gray-50"
                             }`}
@@ -483,7 +489,10 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
                                 <button
                                   key={c}
                                   type="button"
-                                  onClick={() => setCity(c)}
+                                  onClick={() => {
+                                    setCity(c);
+                                    if (isMobile) setOpenDestination(false);
+                                  }}
                                   className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
                                     active ? "bg-gray-100 font-semibold" : "hover:bg-gray-50"
                                   }`}

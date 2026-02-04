@@ -4,6 +4,7 @@ import * as React from "react"
 import { ChevronDown, Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useMobile } from "@/lib/use-mobile"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,7 @@ export function DestinationPicker({
   onOpenChange,
   onChange,
 }: Props) {
+  const isMobile = useMobile()
   const [countries, setCountries] = React.useState<string[]>([])
   const [countriesLoading, setCountriesLoading] = React.useState(false)
   const [countriesError, setCountriesError] = React.useState<string | null>(null)
@@ -160,7 +162,10 @@ export function DestinationPicker({
                   <button
                     key={c}
                     type="button"
-                    onClick={() => onChange({ country: c, resorts: [] })}
+                    onClick={() => {
+                      onChange({ country: c, resorts: [] })
+                      if (isMobile) onOpenChange(false)
+                    }}
                     className={cn(
                       "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-gray-50",
                       isActive ? "bg-gray-100 font-semibold" : ""
@@ -236,7 +241,11 @@ export function DestinationPicker({
           >
             Очистить
           </Button>
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Готово
           </Button>
         </div>
