@@ -53,25 +53,15 @@ export function DateRangePicker({
 }: Props) {
   const from = toDate(dateFrom)
   const to = toDate(dateTo)
-  const allowCloseRef = React.useRef(false)
 
   const selected: DateRange | undefined =
     from || to ? { from, to } : undefined
 
-  // When popover opens, disallow close so first date click doesn't close. Allow close only when both dates selected.
-  React.useEffect(() => {
-    if (open) allowCloseRef.current = false
-    if (from && to) allowCloseRef.current = true
-  }, [open, from, to])
-
+  // Close only via "Готово" button — ignore Radix close (outside click, focus outside, etc.)
   const handleOpenChange = React.useCallback(
     (nextOpen: boolean) => {
-      if (nextOpen) {
-        onOpenChange(true)
-        return
-      }
-      if (!allowCloseRef.current) return
-      onOpenChange(false)
+      if (nextOpen) onOpenChange(true)
+      // never call onOpenChange(false) here — only "Готово" closes
     },
     [onOpenChange]
   )
@@ -94,9 +84,7 @@ export function DateRangePicker({
     const nextFrom = range?.from
     const nextTo = range?.to
 
-    // 1) Only start date chosen → keep calendar open (do not close)
     if (nextFrom && !nextTo) {
-      allowCloseRef.current = false
       onChange({
         dateFrom: toISO(nextFrom),
         dateTo: null,
@@ -105,10 +93,7 @@ export function DateRangePicker({
       })
       return
     }
-
-    // 2) Both dates chosen and end > start → update (родитель закроет календарь по onChange, если нужно)
     if (nextFrom && nextTo) {
-      allowCloseRef.current = true
       onChange({
         dateFrom: toISO(nextFrom),
         dateTo: toISO(nextTo),
@@ -117,9 +102,6 @@ export function DateRangePicker({
       })
       return
     }
-
-    // 3) Clear selection — можно закрывать
-    allowCloseRef.current = true
     onChange({ dateFrom: null, dateTo: null, nightsFrom, nightsTo })
   }
 
@@ -153,21 +135,15 @@ export function DateRangePicker({
       <PopoverContent
         align="start"
         className="w-auto max-w-[calc(100vw-2rem)] p-0 border-0 shadow-none"
-        onPointerDownOutside={(e) => {
-          if (!allowCloseRef.current) e.preventDefault()
-        }}
-        onInteractOutside={(e) => {
-          if (!allowCloseRef.current) e.preventDefault()
-        }}
-        onFocusOutside={(e) => {
-          if (!allowCloseRef.current) e.preventDefault()
-        }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        onFocusOutside={(e) => e.preventDefault()}
       >
         <TravelDateCalendar
           selected={selected}
           onSelect={handleSelect}
           onClear={handleClear}
-          onDone={() => from && to && onOpenChange(false)}
+          onDone={() => onOpenChange(false)}
           fromDate={minDate}
           defaultMonth={from ?? addDays(minDate, 7)}
         />

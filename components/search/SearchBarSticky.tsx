@@ -34,7 +34,6 @@ export function SearchBarSticky({
   const [active, setActive] = React.useState<
     null | "departure" | "destination" | "dates" | "nights" | "people"
   >(null)
-  const datesBothSelectedRef = React.useRef(false)
 
   const fieldBase = "w-full min-w-0 flex items-stretch flex-1"
   const fieldHeight = "h-[var(--input-height)] min-h-[var(--input-height)]"
@@ -116,22 +115,10 @@ export function SearchBarSticky({
                 nightsTo={state.nightsTo}
                 open={active === "dates"}
                 onOpenChange={(open) => {
-                  if (open) {
-                    datesBothSelectedRef.current = Boolean(state.dateFrom && state.dateTo)
-                    setActive("dates")
-                    return
-                  }
-                  setActive((prev) => {
-                    if (prev !== "dates") return prev
-                    if (datesBothSelectedRef.current) return null
-                    return "dates"
-                  })
+                  if (open) setActive("dates")
+                  else setActive((prev) => (prev === "dates" ? null : prev))
                 }}
-                onChange={(patch) => {
-                  datesBothSelectedRef.current = Boolean(patch.dateFrom && patch.dateTo)
-                  onPatch(patch)
-                  if (datesBothSelectedRef.current) setActive((prev) => (prev === "dates" ? null : prev))
-                }}
+                onChange={(patch) => onPatch(patch)}
               />
             </div>
 
