@@ -92,12 +92,17 @@ export default function TourPage({ params }: TourPageProps) {
     return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
   }, [tour, selectedVariantId])
 
-  /** Показываем только самый дешёвый вариант тура */
+  /** Группируем по ночам, показываем только самый дешёвый вариант для каждой длительности (без туроператоров) */
   const displayVariants = useMemo(() => {
     const variants = tour?.variants
     if (!variants?.length) return []
-    const cheapest = variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
-    return [cheapest]
+    const byNights = new Map<number, typeof variants[0]>()
+    for (const v of variants) {
+      const nights = v.nights ?? 0
+      const existing = byNights.get(nights)
+      if (!existing || v.price < existing.price) byNights.set(nights, v)
+    }
+    return Array.from(byNights.values()).sort((a, b) => (a.nights ?? 0) - (b.nights ?? 0))
   }, [tour])
 
   const copyLink = () => {

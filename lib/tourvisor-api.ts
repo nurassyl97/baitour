@@ -289,9 +289,11 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
     // API expects singular countryId, take first one
     queryParams.append('countryId', params.countryIds[0].toString());
   }
-  // Nights range
-  const nightsFrom = params.nights.from;
-  const nightsTo = Math.max(params.nights.to, nightsFrom);
+  // Nights range — API Tourvisor возвращает "invalid nightsTo parameter" при nightsTo > 7
+  const NIGHTS_API_MIN = 1;
+  const NIGHTS_API_MAX = 7;
+  const nightsFrom = Math.max(NIGHTS_API_MIN, Math.min(NIGHTS_API_MAX, params.nights.from));
+  const nightsTo = Math.max(nightsFrom, Math.min(NIGHTS_API_MAX, Math.max(params.nights.to, nightsFrom)));
   queryParams.append('nightsFrom', nightsFrom.toString());
   queryParams.append('nightsTo', nightsTo.toString());
   console.log('Nights range being sent:', { nightsFrom, nightsTo });

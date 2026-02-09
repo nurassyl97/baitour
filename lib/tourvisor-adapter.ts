@@ -174,17 +174,31 @@ function formatDurationRange(nightsFrom?: number, nightsTo?: number): string {
 }
 
 /**
+ * Оставляем только варианты с датой вылета в выбранном диапазоне [dateFrom, dateTo]
+ */
+function filterVariantsByDateRange(
+  variants: TourVariant[],
+  dateFrom?: string | null,
+  dateTo?: string | null
+): TourVariant[] {
+  if (!dateFrom || !dateTo || variants.length === 0) return variants;
+  return variants.filter((v) => v.date && v.date >= dateFrom && v.date <= dateTo);
+}
+
+/**
  * Transform array of Tourvisor search hotels
  */
 export function transformTours(
   tourvisorHotels: TourvisorSearchHotel[],
   searchParams?: SearchParams
 ): Tour[] {
+  const dateFrom = searchParams?.dateFrom ?? null;
+  const dateTo = searchParams?.dateTo ?? null;
+
   return tourvisorHotels.map((h) => {
     const hotelName = h.name || 'Hotel';
     const countryName = h.country?.name || 'Unknown Country';
     const regionName = h.region?.name || 'Resort';
-    const price = h.price ?? 0;
     const currency = h.currency || 'KZT';
     const rating = h.rating ?? (h.category ? h.category * 1.8 : 4.0);
 
@@ -194,7 +208,11 @@ export function transformTours(
     };
 
     const image = getHotelImage(imageSource);
-    const variants = (h.tours || []).map(toVariant);
+    const allVariants = (h.tours || []).map(toVariant);
+    const variants = filterVariantsByDateRange(allVariants, dateFrom, dateTo);
+    const price = h.price ?? 0;
+
+    const minPrice = variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : price;
 
     return {
       id: String(h.id),
@@ -209,7 +227,7 @@ export function transformTours(
               Math.max(...variants.map((v) => v.nights))
             )
           : formatDurationRange(searchParams?.nightsFrom, searchParams?.nightsTo),
-      price: variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : price,
+      price: minPrice,
       currency,
       rating,
       reviewCount: 0,

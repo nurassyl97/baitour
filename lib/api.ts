@@ -87,8 +87,8 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
     departureId: params.departureId || DEFAULT_DEPARTURE_ID,
     countryIds: [],
     nights: {
-      from: params.nightsFrom || 6,
-      to: params.nightsTo || 6,
+      from: params.nightsFrom ?? 6,
+      to: params.nightsTo ?? 14,
     },
     adults: params.adults || 2,
     children: params.children || 0,
@@ -370,7 +370,12 @@ export async function searchTours(
     console.log(`Found ${tourvisorHotels.length} hotels from Tourvisor`);
 
     // Transform to our format (search API gives only one picturelink per hotel)
-    const tours = tourvisorAdapter.transformTours(tourvisorHotels, params);
+    let tours = tourvisorAdapter.transformTours(tourvisorHotels, params);
+
+    // При выбранных датах показываем только отели с турами в этом диапазоне
+    if (params.dateFrom && params.dateTo) {
+      tours = tours.filter((t) => t.variants && t.variants.length > 0);
+    }
 
     // Enrich with full photo gallery from hotel description API (GET /hotels/{id})
     const toursWithPhotos = await enrichToursWithHotelPhotos(tours);

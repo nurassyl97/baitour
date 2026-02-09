@@ -99,12 +99,13 @@ export function TravelDateCalendar({
         selected={showHoverPreview && hoverFrom && hoverTo ? { from: hoverFrom, to: hoverTo } : selected}
         onSelect={onSelect}
         fromDate={minDate}
+        disabled={{ before: minDate }}
         onDayMouseEnter={(date) => {
           if (selected?.from && !selected?.to) setHoveredDate(date)
         }}
         onDayMouseLeave={() => setHoveredDate(null)}
         defaultMonth={defaultMonth ?? addDays(minDate, 7)}
-        showOutsideDays
+        showOutsideDays={false}
         className="p-0"
         classNames={{
           root: "w-full",
@@ -127,17 +128,17 @@ export function TravelDateCalendar({
           day_button:
             "h-11 w-11 flex items-center justify-center text-[14px] font-medium leading-5 rounded-lg cursor-pointer text-[#0F172A] hover:bg-[#F1F5F9] focus:outline-none",
           range_start:
-            "!bg-[#22a7f0] !text-white rounded-full hover:!bg-[#22a7f0] hover:!text-white",
+            "!bg-[#22a7f0]/70 !text-white hover:!bg-[#22a7f0]/70 hover:!text-white",
           range_end:
-            "!bg-[#22a7f0] !text-white rounded-full hover:!bg-[#22a7f0] hover:!text-white",
+            "!bg-[#22a7f0]/70 !text-white hover:!bg-[#22a7f0]/70 hover:!text-white",
           range_middle:
-            "!bg-[#22a7f0]/50 !text-[#0F172A] rounded-none hover:!bg-[#22a7f0]/50 hover:!text-[#0F172A]",
+            "!bg-[#22a7f0]/35 !text-[#0F172A] hover:!bg-[#22a7f0]/35 hover:!text-[#0F172A]",
           selected:
-            "!bg-[#22a7f0] !text-white rounded-full hover:!bg-[#22a7f0] hover:!text-white",
+            "!bg-[#22a7f0]/70 !text-white hover:!bg-[#22a7f0]/70 hover:!text-white",
           outside:
-            "!text-[#CBD5E1] opacity-50 pointer-events-none aria-selected:!bg-[#22a7f0]/50 aria-selected:!text-[#0F172A]",
+            "!text-[#CBD5E1] opacity-50 pointer-events-none aria-selected:!bg-[#22a7f0]/35 aria-selected:!text-[#0F172A]",
           disabled:
-            "!text-[#CBD5E1] opacity-50 pointer-events-none",
+            "!text-[#94A3B8] !bg-[#F1F5F9] opacity-70 cursor-not-allowed pointer-events-none hover:!bg-[#F1F5F9]",
           today: "bg-transparent text-[#0F172A] font-medium",
           hidden: "invisible",
         }}
@@ -163,11 +164,11 @@ export function TravelDateCalendar({
               : [],
         }}
         modifiersClassNames={{
-          range_start: "!rounded-full",
-          range_end: "!rounded-full",
-          range_middle: "rounded-none",
-          range_middle_left_edge: "!rounded-l-[22px]",
-          range_middle_right_edge: "!rounded-r-[22px]",
+          range_start: "!rounded-[22px]",
+          range_end: "!rounded-[22px]",
+          range_middle: "!rounded-[22px]",
+          range_middle_left_edge: "!rounded-l-[22px] !rounded-r-[22px]",
+          range_middle_right_edge: "!rounded-l-[22px] !rounded-r-[22px]",
         }}
         components={{
           Chevron: ({ orientation, ...p }) =>

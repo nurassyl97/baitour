@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { addDays, differenceInDays, isValid } from "date-fns"
+import { addDays, isValid } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { TravelDateCalendar } from "@/components/ui/travel-date-calendar"
-import { formatShortDateRu, pluralRu } from "./format"
+import { formatShortDateRu } from "./format"
 
 type Props = {
   dateFrom: string | null
@@ -53,34 +53,41 @@ export function DateRangePicker({
 }: Props) {
   const from = toDate(dateFrom)
   const to = toDate(dateTo)
+  const allowCloseRef = React.useRef(false)
 
   const selected: DateRange | undefined =
     from || to ? { from, to } : undefined
 
-  const nights = React.useMemo(() => {
-    if (!from || !to) return null
-    const diff = differenceInDays(to, from)
-    if (!Number.isFinite(diff) || diff <= 0) return null
-    return diff
-  }, [from, to])
+  // When popover opens, disallow close so first date click doesn't close. Allow close only when both dates selected.
+  React.useEffect(() => {
+    if (open) allowCloseRef.current = false
+    if (from && to) allowCloseRef.current = true
+  }, [open, from, to])
+
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        onOpenChange(true)
+        return
+      }
+      if (!allowCloseRef.current) return
+      onOpenChange(false)
+    },
+    [onOpenChange]
+  )
 
   const summary = React.useMemo(() => {
     if (!from || !to) return "Выберите даты"
     const df = formatShortDateRu(toISO(from))
     const dt = formatShortDateRu(toISO(to))
-    const n = nights ?? nightsFrom ?? nightsTo
-    const nText =
-      n && n > 0
-        ? `${n} ${pluralRu(n, "ночь", "ночи", "ночей")}`
-        : ""
-    return `${df} — ${dt}${nText ? `, ${nText}` : ""}`
-  }, [from, to, nights, nightsFrom, nightsTo])
+    return `${df} — ${dt}`
+  }, [from, to])
   const isPlaceholder = !from || !to
 
   const minDate = React.useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    return today
+    return addDays(today, 1)
   }, [])
 
   function handleSelect(range: DateRange | undefined) {
@@ -89,40 +96,39 @@ export function DateRangePicker({
 
     // 1) Only start date chosen → keep calendar open (do not close)
     if (nextFrom && !nextTo) {
+      allowCloseRef.current = false
       onChange({
         dateFrom: toISO(nextFrom),
         dateTo: null,
-        nightsFrom: null,
-        nightsTo: null,
+        nightsFrom,
+        nightsTo,
       })
       return
     }
 
-    // 2) Both dates chosen and end > start → update and close (range complete)
+    // 2) Both dates chosen and end > start → update (родитель закроет календарь по onChange, если нужно)
     if (nextFrom && nextTo) {
-      const n = differenceInDays(nextTo, nextFrom)
-      const safe = Number.isFinite(n) && n > 0 ? n : null
+      allowCloseRef.current = true
       onChange({
         dateFrom: toISO(nextFrom),
         dateTo: toISO(nextTo),
-        nightsFrom: safe,
-        nightsTo: safe,
+        nightsFrom,
+        nightsTo,
       })
-      // Auto-close only when range is complete (both dates, end after start)
-      if (safe != null) onOpenChange(false)
       return
     }
 
-    // 3) Clear selection
-    onChange({ dateFrom: null, dateTo: null, nightsFrom: null, nightsTo: null })
+    // 3) Clear selection — можно закрывать
+    allowCloseRef.current = true
+    onChange({ dateFrom: null, dateTo: null, nightsFrom, nightsTo })
   }
 
   function handleClear() {
-    onChange({ dateFrom: null, dateTo: null, nightsFrom: null, nightsTo: null })
+    onChange({ dateFrom: null, dateTo: null, nightsFrom, nightsTo })
   }
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover open={open} onOpenChange={handleOpenChange} modal={false}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -144,12 +150,24 @@ export function DateRangePicker({
           </div>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto max-w-[calc(100vw-2rem)] p-0 border-0 shadow-none">
+      <PopoverContent
+        align="start"
+        className="w-auto max-w-[calc(100vw-2rem)] p-0 border-0 shadow-none"
+        onPointerDownOutside={(e) => {
+          if (!allowCloseRef.current) e.preventDefault()
+        }}
+        onInteractOutside={(e) => {
+          if (!allowCloseRef.current) e.preventDefault()
+        }}
+        onFocusOutside={(e) => {
+          if (!allowCloseRef.current) e.preventDefault()
+        }}
+      >
         <TravelDateCalendar
           selected={selected}
           onSelect={handleSelect}
           onClear={handleClear}
-          onDone={() => onOpenChange(false)}
+          onDone={() => from && to && onOpenChange(false)}
           fromDate={minDate}
           defaultMonth={from ?? addDays(minDate, 7)}
         />

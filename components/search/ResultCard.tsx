@@ -75,7 +75,6 @@ export function ResultCard({ tour }: { tour: Tour }) {
               <div className="text-xl font-extrabold">
                 от {Math.round(tour.price).toLocaleString("ru-RU")} {priceSymbol}
               </div>
-              <div className="text-xs text-muted-foreground">за человека</div>
             </div>
 
             <Button asChild className="bg-[#22a7f0] hover:bg-[#1b8fd8] font-bold">

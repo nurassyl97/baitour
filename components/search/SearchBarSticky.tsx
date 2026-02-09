@@ -7,6 +7,7 @@ import type { SearchQueryState } from "./SearchFormState"
 import { DeparturePicker } from "./DeparturePicker"
 import { DestinationPicker } from "./DestinationPicker"
 import { DateRangePicker } from "./DateRangePicker"
+import { NightsPicker } from "./NightsPicker"
 import { PeoplePicker } from "./PeoplePicker"
 
 type Props = {
@@ -31,8 +32,9 @@ export function SearchBarSticky({
   hideSubmitButton = false,
 }: Props) {
   const [active, setActive] = React.useState<
-    null | "departure" | "destination" | "dates" | "people"
+    null | "departure" | "destination" | "dates" | "nights" | "people"
   >(null)
+  const datesBothSelectedRef = React.useRef(false)
 
   const fieldBase = "w-full min-w-0 flex items-stretch flex-1"
   const fieldHeight = "h-[var(--input-height)] min-h-[var(--input-height)]"
@@ -113,8 +115,41 @@ export function SearchBarSticky({
                 nightsFrom={state.nightsFrom}
                 nightsTo={state.nightsTo}
                 open={active === "dates"}
+                onOpenChange={(open) => {
+                  if (open) {
+                    datesBothSelectedRef.current = Boolean(state.dateFrom && state.dateTo)
+                    setActive("dates")
+                    return
+                  }
+                  setActive((prev) => {
+                    if (prev !== "dates") return prev
+                    if (datesBothSelectedRef.current) return null
+                    return "dates"
+                  })
+                }}
+                onChange={(patch) => {
+                  datesBothSelectedRef.current = Boolean(patch.dateFrom && patch.dateTo)
+                  onPatch(patch)
+                  if (datesBothSelectedRef.current) setActive((prev) => (prev === "dates" ? null : prev))
+                }}
+              />
+            </div>
+
+            <div
+              className={cn(
+                fieldBase,
+                fieldHeight,
+                mobileField,
+                "md:border-l md:flex-1",
+                active === "nights" ? activeClass : ""
+              )}
+            >
+              <NightsPicker
+                nightsFrom={state.nightsFrom}
+                nightsTo={state.nightsTo}
+                open={active === "nights"}
                 onOpenChange={(open) =>
-                  setActive((prev) => (open ? "dates" : prev === "dates" ? null : prev))
+                  setActive((prev) => (open ? "nights" : prev === "nights" ? null : prev))
                 }
                 onChange={(patch) => onPatch(patch)}
               />

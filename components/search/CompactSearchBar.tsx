@@ -53,7 +53,7 @@ export function CompactSearchBar({ state, onEditClick, className }: Props) {
 
   const from = toDate(state.dateFrom);
   const to = toDate(state.dateTo);
-  const nights =
+  const nightsFromDates =
     from && to && to > from
       ? Math.round((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000))
       : null;
@@ -67,7 +67,17 @@ export function CompactSearchBar({ state, onEditClick, className }: Props) {
       : `${state.adults} ${pluralRu(state.adults, "взрослый", "взрослых", "взрослых")}`;
 
   const parts: string[] = [];
-  if (nights != null && nights > 0) parts.push(`${nights} ${pluralRu(nights, "ночь", "ночи", "ночей")}`);
+  if (state.nightsFrom != null && state.nightsTo != null) {
+    const nFrom = state.nightsFrom;
+    const nTo = state.nightsTo;
+    if (nFrom === nTo) {
+      parts.push(`${nFrom} ${pluralRu(nFrom, "ночь", "ночи", "ночей")}`);
+    } else {
+      parts.push(`${nFrom} — ${nTo} ночей`);
+    }
+  } else if (nightsFromDates != null && nightsFromDates > 0) {
+    parts.push(`${nightsFromDates} ${pluralRu(nightsFromDates, "ночь", "ночи", "ночей")}`);
+  }
   if (dateRange) parts.push(dateRange);
   parts.push(guests);
   const subtitle = parts.join(" · ");
