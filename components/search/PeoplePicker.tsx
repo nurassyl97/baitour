@@ -76,7 +76,7 @@ export function PeoplePicker({
               <span className="min-w-0 truncate text-base font-medium leading-tight text-gray-900 whitespace-nowrap">
                 {label}
               </span>
-              <ChevronDown className="size-4 shrink-0 text-gray-400" aria-hidden />
+              <ChevronDown className="size-4 shrink-0 text-gray-400 hidden md:block" aria-hidden />
             </div>
           </div>
         </button>

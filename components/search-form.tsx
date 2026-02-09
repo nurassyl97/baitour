@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const CITY_ALL = "__all__";
 
@@ -36,9 +37,12 @@ function formatShortDateRu(value: string): string {
     .replace(/\.$/, "");
 }
 
-export function SearchForm({ variant = "default" }: { variant?: "default" | "compact" }) {
+type SearchFormProps = { variant?: "default" | "compact"; submitLabel?: string };
+
+export function SearchForm({ variant = "default", submitLabel: submitLabelProp }: SearchFormProps) {
   const isCompact = variant === "compact";
   const isMobile = useMobile();
+  const submitLabel = submitLabelProp ?? "Найти";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchType, setSearchType] = useState("tours");
   const [country, setCountry] = useState("");
@@ -298,7 +302,7 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
     window.location.href = url;
   };
 
-  const fieldHeight = "h-[64px] min-h-[64px]";
+  const fieldHeight = "h-14 min-h-14 md:h-[64px] md:min-h-[64px]";
   const fieldBase =
     "relative flex-1 min-w-0 flex flex-col justify-center px-4 border-[#E5E7EB] select-none";
   const blockClickable =
@@ -740,23 +744,30 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
               )}
             </div>
 
-            {/* Найти — height 64px, primary blue #22A7F0, centered */}
+            {/* Найти — desktop 64px; mobile compact: full-width ≥56px, primary */}
             <div
               ref={submitRef}
-              className="h-[64px] min-h-[64px] flex-shrink-0 flex items-center justify-center border-t md:border-t-0 border-l border-[#E5E7EB] w-full md:w-auto md:min-w-[140px]"
+              className={cn(
+                "flex-shrink-0 flex items-center justify-center border-t border-[#E5E7EB] w-full md:min-w-[140px]",
+                "h-14 min-h-14 md:h-[64px] md:min-h-[64px]",
+                "md:border-t-0 md:border-l"
+              )}
             >
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-full w-full md:min-w-[120px] rounded-none rounded-r-[14px] bg-[#22a7f0] hover:bg-[#1b8fd8] text-white text-[16px] font-semibold disabled:opacity-90"
+                className={cn(
+                  "h-full w-full rounded-none bg-[#22a7f0] hover:bg-[#1b8fd8] text-white text-[16px] font-semibold disabled:opacity-90",
+                  "min-h-[56px] md:min-h-0 md:min-w-[120px] md:rounded-r-[14px]"
+                )}
               >
-                {isSubmitting ? "Поиск…" : "Найти"}
+                {isSubmitting ? "Поиск…" : submitLabel}
               </Button>
             </div>
         </div>
 
-        {/* Filters Row — компактный вариант: только 2 чипа; полный — все фильтры */}
-        {isCompact ? (
+        {/* Filters Row — компактный вариант: только 2 чипа (скрыты на mobile, чтобы не отвлекать) */}
+        {isCompact && !isMobile ? (
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#64748B]">
               <Star className="h-4 w-4 text-[#E5E7EB]" />
@@ -766,7 +777,7 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
               Любой бюджет
             </span>
           </div>
-        ) : (
+        ) : !isCompact ? (
         <div className="flex flex-wrap items-center gap-2 mt-4">
           {/* Hotel Class */}
           <div className="rounded-full border border-[#E5E7EB] bg-[#FFFFFF] px-3 py-2 flex items-center gap-2">
@@ -853,7 +864,7 @@ export function SearchForm({ variant = "default" }: { variant?: "default" | "com
             </Select>
           </div>
         </div>
-        )}
+        ) : null}
       </form>
     </div>
   );

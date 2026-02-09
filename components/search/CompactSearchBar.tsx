@@ -75,27 +75,29 @@ export function CompactSearchBar({ state, onEditClick, className }: Props) {
   return (
     <div
       className={cn(
-        "sticky top-[env(safe-area-inset-top)] z-40 bg-[#F9FAFB] border-b border-[var(--border)]",
-        "pt-[env(safe-area-inset-top)]",
-        "md:hidden",
+        "sticky top-0 z-[40] pt-[env(safe-area-inset-top)] px-4 md:hidden",
         className
       )}
     >
-      <div className="ds-container py-3">
-        <div className="flex items-center justify-between gap-3 min-h-14">
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-[#0F172A] truncate">{title}</div>
-            <div className="text-xs text-[#64748B] truncate">{subtitle}</div>
-          </div>
-          <button
-            type="button"
-            onClick={onEditClick}
-            className="shrink-0 flex items-center justify-center h-10 w-10 rounded-lg border border-[var(--border)] bg-white text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] transition-colors"
-            aria-label="Изменить поиск"
-          >
-            <Pencil className="size-4" aria-hidden />
-          </button>
+      <div
+        className={cn(
+          "ds-container flex items-center justify-between gap-3 min-h-[56px]",
+          "rounded-2xl border border-[var(--border)] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]",
+          "px-4"
+        )}
+      >
+        <div className="min-w-0 flex-1 py-3">
+          <div className="text-sm font-semibold text-[#0F172A] truncate">{title}</div>
+          <div className="text-xs text-[#64748B] truncate">{subtitle}</div>
         </div>
+        <button
+          type="button"
+          onClick={onEditClick}
+          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl border border-[var(--border)] bg-[#F9FAFB] text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] transition-colors"
+          aria-label="Изменить поиск"
+        >
+          <Pencil className="size-4" aria-hidden />
+        </button>
       </div>
     </div>
   );

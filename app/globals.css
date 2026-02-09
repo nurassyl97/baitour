@@ -91,8 +91,8 @@
   --input-height: 64px;
   /* Mobile search bar height (5 rows + container padding + safe-area) so content doesn't sit under sticky bar */
   --search-bar-mobile-height: calc(5 * var(--input-height) + 2rem + env(safe-area-inset-top, 0px));
-  /* Compact search bar (Freedom Travel pattern): total height so content padding matches */
-  --compact-bar-height: calc(80px + env(safe-area-inset-top, 0px));
+  /* Compact search bar (Freedom Travel pattern): ~56px content + safe area */
+  --compact-bar-height: calc(56px + env(safe-area-inset-top, 0px));
   --radius: 14px;
   --section-spacing: 24px;
   --card-padding: 20px;
@@ -108,6 +108,12 @@
   --label-font-weight: 400;
   --button-font-size: 16px;
   --button-font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --input-height: 56px;
+  }
 }
 
 .dark {
@@ -234,5 +240,12 @@
 
   button[role="combobox"] {
     color: var(--text-main);
+  }
+
+  /* Mobile-first home: первый экран = header + блок поиска */
+  @media (max-width: 767px) {
+    .home-search-section {
+      min-height: calc(100dvh - 56px);
+    }
   }
 }

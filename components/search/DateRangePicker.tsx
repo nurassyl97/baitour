@@ -139,7 +139,7 @@ export function DateRangePicker({
               >
                 {summary}
               </span>
-              <ChevronDown className="size-4 shrink-0 text-gray-400" aria-hidden />
+              <ChevronDown className="size-4 shrink-0 text-gray-400 hidden md:block" aria-hidden />
             </div>
           </div>
         </button>

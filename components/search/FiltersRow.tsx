@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useMobile } from "@/lib/use-mobile"
 import type { SearchQueryState } from "./SearchFormState"
 import {
   DEFAULT_BUDGET_MIN,
@@ -14,8 +15,9 @@ type Props = {
   className?: string
 }
 
-/** Pills row below search bar: secondary visual, reduced contrast */
+/** Строка под поиском: на desktop — «Любой класс», «Любой бюджет» (+ «Для семей»); на mobile — только «Для семей» */
 export function FiltersRow({ state, className }: Props) {
+  const isMobile = useMobile()
   const hasDefaultBudget =
     state.budgetMin === DEFAULT_BUDGET_MIN && state.budgetMax === DEFAULT_BUDGET_MAX
   const budgetLabel = hasDefaultBudget
@@ -33,6 +35,8 @@ export function FiltersRow({ state, className }: Props) {
     state.family.kidsClub ||
     state.family.playground
 
+  if (isMobile && !hasFamily) return null
+
   return (
     <div
       className={cn(
@@ -41,16 +45,15 @@ export function FiltersRow({ state, className }: Props) {
         className
       )}
     >
+      {/* Только на desktop — как на макете веб-версии */}
       <span
-        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-sm font-normal text-gray-600"
+        className="hidden md:inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-sm font-normal text-gray-600"
         aria-label="Класс отеля"
       >
         <Star className="size-3.5 text-amber-500" aria-hidden />
         {starsLabel}
       </span>
-      <span
-        className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-sm font-normal text-gray-600"
-      >
+      <span className="hidden md:inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-sm font-normal text-gray-600">
         {budgetLabel}
       </span>
       {hasFamily && (

@@ -14,7 +14,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-gradient-to-r from-[#22a7f0] to-[#1b8fd8] shadow-md relative">
+    <nav className="border-b bg-gradient-to-r from-[#22a7f0] to-[#1b8fd8] shadow-md relative z-50">
       <div className="ds-container py-4 flex items-center justify-between">
         <Link
           href="/"

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { SearchBarSticky } from "./SearchBarSticky";
 import type { SearchQueryState } from "./SearchFormState";
 
@@ -55,48 +56,64 @@ export function SearchModal({ open, onClose, state, onPatch, onSubmit }: Props) 
         aria-hidden
       />
 
-      {/* Bottom sheet */}
+      {/* Bottom sheet: scrollable form + fixed bottom CTA */}
         <div
           ref={panelRef}
           className={cn(
-            "absolute left-0 right-0 bottom-0 max-h-[90vh] overflow-y-auto",
+            "absolute left-0 right-0 bottom-0 max-h-[90vh]",
             "bg-[#F9FAFB] rounded-t-2xl shadow-xl",
-            "flex flex-col pb-[env(safe-area-inset-bottom)]",
+            "flex flex-col",
             "animate-in slide-in-from-bottom duration-300"
           )}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Drag handle (visual + swipe hint) */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-300" aria-hidden />
-        </div>
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Drag handle (visual + swipe hint) */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-10 h-1 rounded-full bg-gray-300" aria-hidden />
+          </div>
 
-        {/* Header: title + close */}
-        <div className="flex items-center justify-between px-4 pb-2">
-          <h2 className="text-lg font-semibold text-[#0F172A]">Параметры поиска</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center h-10 w-10 rounded-full text-[#64748B] hover:bg-[#E5E7EB] hover:text-[#0F172A] transition-colors"
-            aria-label="Закрыть"
+          {/* Header: title + close */}
+          <div className="flex items-center justify-between px-4 pb-2 shrink-0">
+            <h2 className="text-lg font-semibold text-[#0F172A]">Параметры поиска</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex items-center justify-center h-10 w-10 rounded-full text-[#64748B] hover:bg-[#E5E7EB] hover:text-[#0F172A] transition-colors"
+              aria-label="Закрыть"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+          </div>
+
+          {/* Form: scrollable */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            <SearchBarSticky
+              state={state}
+              onPatch={onPatch}
+              onSubmit={handleSubmit}
+              sticky={false}
+              submitLabel="Найти туры"
+              hideSubmitButton
+              className="!bg-transparent"
+            />
+          </div>
+
+          {/* Кнопка «Найти туры» фиксирована снизу sheet */}
+          <div
+            className={cn(
+              "shrink-0 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] bg-[#F9FAFB] border-t border-[var(--border)]"
+            )}
           >
-            <X className="size-5" aria-hidden />
-          </button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              className="w-full min-h-[56px] rounded-xl bg-primary hover:bg-primary/90 text-white text-lg font-semibold tracking-tight shadow-sm"
+            >
+              Найти туры
+            </Button>
+          </div>
         </div>
-
-        {/* Form (no sticky, inline in modal); close on «Найти туры» */}
-        <div className="px-4 pb-6">
-          <SearchBarSticky
-            state={state}
-            onPatch={onPatch}
-            onSubmit={handleSubmit}
-            sticky={false}
-            submitLabel="Найти туры"
-            className="!bg-transparent"
-          />
-        </div>
-      </div>
     </div>
   );
 }

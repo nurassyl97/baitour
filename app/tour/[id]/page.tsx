@@ -15,8 +15,6 @@ import {
   Building2,
   BedDouble,
   UtensilsCrossed,
-  Headphones,
-  Info,
   Plane,
   Briefcase,
   Shield,
@@ -93,6 +91,14 @@ export default function TourPage({ params }: TourPageProps) {
     }
     return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
   }, [tour, selectedVariantId])
+
+  /** Показываем только самый дешёвый вариант тура */
+  const displayVariants = useMemo(() => {
+    const variants = tour?.variants
+    if (!variants?.length) return []
+    const cheapest = variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
+    return [cheapest]
+  }, [tour])
 
   const copyLink = () => {
     if (typeof window === "undefined") return
@@ -231,8 +237,8 @@ export default function TourPage({ params }: TourPageProps) {
 
             {activeTab === "tours" && (
               <div className="space-y-4">
-                {tour.variants && tour.variants.length > 0 ? (
-                  tour.variants.map((variant, index) => {
+                {displayVariants.length > 0 ? (
+                  displayVariants.map((variant, index) => {
                     const dateFrom = variant.date
                       ? new Date(variant.date)
                       : null
@@ -254,7 +260,6 @@ export default function TourPage({ params }: TourPageProps) {
                         : variant.date
                           ? new Date(variant.date).toLocaleDateString("ru-RU")
                           : "—"
-                    const isSelected = selectedVariant?.id === variant.id
                     const priceSymbol =
                       variant.currency === "KZT" ? "₸" : variant.currency
                     return (
@@ -263,10 +268,10 @@ export default function TourPage({ params }: TourPageProps) {
                         className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
                       >
                         <div className="flex flex-col gap-4 md:flex-row md:items-stretch md:gap-0">
-                          {/* Left: room type + dates + occupancy */}
+                          {/* Left: dates + occupancy (туроператор скрыт) */}
                           <div className="min-w-0 flex-1 space-y-2">
                             <h3 className="font-semibold text-gray-900">
-                              Тур от {variant.operator}
+                              Тур
                             </h3>
                             <div className="flex flex-col gap-1 text-sm text-gray-500">
                               <span className="flex items-center gap-2">
@@ -279,7 +284,7 @@ export default function TourPage({ params }: TourPageProps) {
                               </span>
                             </div>
                           </div>
-                          {/* Middle: size, meal, operator + vertical separator */}
+                          {/* Middle: size, meal (туроператор скрыт) */}
                           <div className="flex flex-1 flex-col gap-1 border-gray-200 pl-0 text-sm text-gray-500 md:border-l md:pl-5">
                             <span className="flex items-center gap-2">
                               <Building2 className="size-4 shrink-0 text-gray-400" />
@@ -289,32 +294,21 @@ export default function TourPage({ params }: TourPageProps) {
                               <UtensilsCrossed className="size-4 shrink-0 text-gray-400" />
                               {variant.meal || "Только завтрак"}
                             </span>
-                            <span className="flex items-center gap-2">
-                              <Headphones className="size-4 shrink-0 text-gray-400" />
-                              Туроператор {variant.operator}
-                            </span>
                           </div>
-                          {/* Right: price + alternative link + button */}
+                          {/* Right: price + button (без «от других операторов») */}
                           <div className="flex shrink-0 flex-col items-end justify-between gap-3 border-gray-200 pl-0 md:border-l md:pl-5">
                             <div className="text-right">
                               <div className="text-xl font-bold text-gray-900">
                                 {variant.price.toLocaleString("ru-RU")}{" "}
                                 {priceSymbol}
                               </div>
-                              <Link
-                                href="/search"
-                                className="mt-1 inline-flex items-center gap-1 text-sm text-[#22a7f0] hover:underline"
-                              >
-                                от других операторов
-                                <Info className="size-3.5 shrink-0" />
-                              </Link>
                             </div>
                             <Button
                               size="sm"
                               className="w-full shrink-0 bg-[#22a7f0] px-4 py-2 font-medium text-white hover:bg-[#1b8fd8] md:w-auto"
                               onClick={() => setSelectedVariantId(variant.id)}
                             >
-                              {isSelected ? "Выбрано" : "Выбрать"}
+                              Выбрано
                             </Button>
                           </div>
                         </div>
