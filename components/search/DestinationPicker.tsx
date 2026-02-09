@@ -9,6 +9,157 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 
+/** Порядок популярных стран для секции «Популярные» (как на макете) */
+const POPULAR_COUNTRIES = [
+  "Турция",
+  "Египет",
+  "Таиланд",
+  "ОАЭ",
+  "Китай",
+  "Вьетнам",
+]
+
+/** Флаг страны по имени (русское название из API) */
+function getCountryFlag(name: string): string {
+  const flags: Record<string, string> = {
+    // Популярные и основные
+    Турция: "🇹🇷",
+    Египет: "🇪🇬",
+    Таиланд: "🇹🇭",
+    ОАЭ: "🇦🇪",
+    Китай: "🇨🇳",
+    Вьетнам: "🇻🇳",
+    Греция: "🇬🇷",
+    Испания: "🇪🇸",
+    Италия: "🇮🇹",
+    Франция: "🇫🇷",
+    Кипр: "🇨🇾",
+    Мальдивы: "🇲🇻",
+    Индонезия: "🇮🇩",
+    Тунис: "🇹🇳",
+    Доминикана: "🇩🇴",
+    Куба: "🇨🇺",
+    Мексика: "🇲🇽",
+    "Шри-Ланка": "🇱🇰",
+    Индия: "🇮🇳",
+    Марокко: "🇲🇦",
+    Венгрия: "🇭🇺",
+    Чехия: "🇨🇿",
+    Австрия: "🇦🇹",
+    Германия: "🇩🇪",
+    Португалия: "🇵🇹",
+    Нидерланды: "🇳🇱",
+    Болгария: "🇧🇬",
+    Черногория: "🇲🇪",
+    Хорватия: "🇭🇷",
+    Грузия: "🇬🇪",
+    Оман: "🇴🇲",
+    Катар: "🇶🇦",
+    Япония: "🇯🇵",
+    "Южная Корея": "🇰🇷",
+    ЮжнаяКорея: "🇰🇷",
+    Сингапур: "🇸🇬",
+    Малайзия: "🇲🇾",
+    США: "🇺🇸",
+    Бразилия: "🇧🇷",
+    Аргентина: "🇦🇷",
+    Иордания: "🇯🇴",
+    Израиль: "🇮🇱",
+    // СНГ, Кавказ, Ближний Восток
+    Абхазия: "🇬🇪",
+    Азербайджан: "🇦🇿",
+    Армения: "🇦🇲",
+    Бахрейн: "🇧🇭",
+    Беларусь: "🇧🇾",
+    Казахстан: "🇰🇿",
+    Киргизия: "🇰🇬",
+    Кыргызстан: "🇰🇬",
+    Молдова: "🇲🇩",
+    Молдавия: "🇲🇩",
+    Россия: "🇷🇺",
+    Таджикистан: "🇹🇯",
+    Туркменистан: "🇹🇲",
+    Узбекистан: "🇺🇿",
+    Украина: "🇺🇦",
+    Уругвай: "🇺🇾",
+    Эстония: "🇪🇪",
+    Латвия: "🇱🇻",
+    Литва: "🇱🇹",
+    Польша: "🇵🇱",
+    Румыния: "🇷🇴",
+    Сербия: "🇷🇸",
+    Словакия: "🇸🇰",
+    Словения: "🇸🇮",
+    Финляндия: "🇫🇮",
+    Швеция: "🇸🇪",
+    Норвегия: "🇳🇴",
+    Дания: "🇩🇰",
+    Исландия: "🇮🇸",
+    Великобритания: "🇬🇧",
+    Ирландия: "🇮🇪",
+    Швейцария: "🇨🇭",
+    Бельгия: "🇧🇪",
+    Люксембург: "🇱🇺",
+    Монако: "🇲🇨",
+    Андорра: "🇦🇩",
+    "Сан-Марино": "🇸🇲",
+    Ватикан: "🇻🇦",
+    Мальта: "🇲🇹",
+    Албания: "🇦🇱",
+    "Северная Македония": "🇲🇰",
+    Македония: "🇲🇰",
+    Босния: "🇧🇦",
+    "Босния и Герцеговина": "🇧🇦",
+    Косово: "🌐",
+    Алжир: "🇩🇿",
+    Ливия: "🇱🇾",
+    Судан: "🇸🇩",
+    Эфиопия: "🇪🇹",
+    Кения: "🇰🇪",
+    Танзания: "🇹🇿",
+    ЮАР: "🇿🇦",
+    "Южная Африка": "🇿🇦",
+    Нигерия: "🇳🇬",
+    Гана: "🇬🇭",
+    Сенегал: "🇸🇳",
+    Камерун: "🇨🇲",
+    СаудовскаяАравия: "🇸🇦",
+    "Саудовская Аравия": "🇸🇦",
+    Кувейт: "🇰🇼",
+    Ирак: "🇮🇶",
+    Иран: "🇮🇷",
+    Сирия: "🇸🇾",
+    Ливан: "🇱🇧",
+    Йемен: "🇾🇪",
+    Пакистан: "🇵🇰",
+    Бангладеш: "🇧🇩",
+    Непал: "🇳🇵",
+    Мьянма: "🇲🇲",
+    Камбоджа: "🇰🇭",
+    Лаос: "🇱🇦",
+    Филиппины: "🇵🇭",
+    "Новая Зеландия": "🇳🇿",
+    Австралия: "🇦🇺",
+    Фиджи: "🇫🇯",
+    Канада: "🇨🇦",
+    Чили: "🇨🇱",
+    Колумбия: "🇨🇴",
+    Перу: "🇵🇪",
+    Эквадор: "🇪🇨",
+    Венесуэла: "🇻🇪",
+    "Коста-Рика": "🇨🇷",
+    Панама: "🇵🇦",
+    Гватемала: "🇬🇹",
+    Ямайка: "🇯🇲",
+    Багамы: "🇧🇸",
+    Тринидад: "🇹🇹",
+    "Тринидад и Тобаго": "🇹🇹",
+    ЮжнаяОсетия: "🇬🇪",
+    "Южная Осетия": "🇬🇪",
+  }
+  return flags[name] ?? "🌐"
+}
+
 type MobileStep = "countries" | "resorts"
 
 type Props = {
@@ -109,6 +260,18 @@ export function DestinationPicker({
     return countries.filter((c) => c.toLowerCase().includes(q))
   }, [countries, countryQuery])
 
+  const { popularCountries, otherCountries } = React.useMemo(() => {
+    const popularSet = new Set(POPULAR_COUNTRIES)
+    const popular: string[] = []
+    const other: string[] = []
+    for (const c of filteredCountries) {
+      if (popularSet.has(c)) popular.push(c)
+      else other.push(c)
+    }
+    popular.sort((a, b) => POPULAR_COUNTRIES.indexOf(a) - POPULAR_COUNTRIES.indexOf(b))
+    return { popularCountries: popular, otherCountries: other }
+  }, [filteredCountries])
+
   const filteredCities = React.useMemo(() => {
     const q = resortQuery.trim().toLowerCase()
     if (!q) return cities
@@ -165,25 +328,57 @@ export function DestinationPicker({
               {countriesError && (
                 <p className="text-xs text-red-600 pb-2">{countriesError}</p>
               )}
-              {filteredCountries.map((c, idx) => (
-                <React.Fragment key={c}>
-                  {idx > 0 && (
-                    <div className="border-t border-gray-200 my-0" />
+              {popularCountries.length > 0 && (
+                <>
+                  <p className="text-sm font-bold text-black pt-1 pb-2">
+                    Популярные
+                  </p>
+                  {popularCountries.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => {
+                        onChange({ country: c, resorts: [] })
+                        setMobileStep("resorts")
+                      }}
+                      className="flex w-full items-center justify-between gap-3 py-4 text-left border-t border-gray-200 first:border-t-0"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="text-xl leading-none" aria-hidden>
+                          {getCountryFlag(c)}
+                        </span>
+                        <span className="text-[16px] font-semibold text-black">
+                          {c}
+                        </span>
+                      </span>
+                      <ChevronRight className="size-5 shrink-0 text-gray-400" />
+                    </button>
+                  ))}
+                  {otherCountries.length > 0 && (
+                    <div className="border-t border-gray-200 mt-1 pt-2" />
                   )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onChange({ country: c, resorts: [] })
-                      setMobileStep("resorts")
-                    }}
-                    className="flex w-full items-center justify-between gap-3 py-4 text-left"
-                  >
+                </>
+              )}
+              {otherCountries.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    onChange({ country: c, resorts: [] })
+                    setMobileStep("resorts")
+                  }}
+                  className="flex w-full items-center justify-between gap-3 py-4 text-left border-t border-gray-200"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-xl leading-none" aria-hidden>
+                      {getCountryFlag(c)}
+                    </span>
                     <span className="text-[16px] font-semibold text-black">
                       {c}
                     </span>
-                    <ChevronRight className="size-5 shrink-0 text-gray-400" />
-                  </button>
-                </React.Fragment>
+                  </span>
+                  <ChevronRight className="size-5 shrink-0 text-gray-400" />
+                </button>
               ))}
             </div>
           </>
@@ -321,7 +516,36 @@ export function DestinationPicker({
                 <div className="px-2 pb-2 text-xs text-red-600">{countriesError}</div>
               )}
               <div className="max-h-80 overflow-auto p-1">
-                {filteredCountries.map((c) => (
+                {popularCountries.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-bold text-gray-700">
+                      Популярные
+                    </div>
+                    {popularCountries.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          onChange({ country: c, resorts: [] })
+                          onOpenChange(false)
+                        }}
+                        className={cn(
+                          "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2",
+                          c === country && "bg-gray-100 font-semibold"
+                        )}
+                      >
+                        <span className="text-base leading-none" aria-hidden>
+                          {getCountryFlag(c)}
+                        </span>
+                        {c}
+                      </button>
+                    ))}
+                    {otherCountries.length > 0 && (
+                      <div className="border-t border-gray-100 my-1" />
+                    )}
+                  </>
+                )}
+                {otherCountries.map((c) => (
                   <button
                     key={c}
                     type="button"
@@ -330,10 +554,13 @@ export function DestinationPicker({
                       onOpenChange(false)
                     }}
                     className={cn(
-                      "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-gray-50",
+                      "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2",
                       c === country && "bg-gray-100 font-semibold"
                     )}
                   >
+                    <span className="text-base leading-none" aria-hidden>
+                      {getCountryFlag(c)}
+                    </span>
                     {c}
                   </button>
                 ))}

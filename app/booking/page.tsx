@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
-import { MapPin, Clock, Users, Loader2 } from "lucide-react";
+import { MapPin, Clock, Users, Loader2, Calendar } from "lucide-react";
 
 function BookingFormContent() {
   const searchParams = useSearchParams();
@@ -23,9 +23,6 @@ function BookingFormContent() {
     fullName: "",
     email: "",
     phone: "",
-    travelDate: "",
-    adults: "2",
-    children: "0",
     specialRequests: "",
     agreeToTerms: false,
   });
@@ -69,6 +66,21 @@ function BookingFormContent() {
     const totalPriceToSend = selectedVariant?.price ?? tour?.price ?? 0;
     const currency = selectedVariant?.currency ?? tour?.currency ?? "KZT";
 
+    const travelDateFromTour =
+      selectedVariant?.date ?? new Date().toISOString().split("T")[0];
+    const adultsFromTour = selectedVariant?.adults ?? tour?.minGuests ?? 2;
+    const childrenFromTour = selectedVariant?.children ?? 0;
+
+    const departureDate = selectedVariant?.date ?? null;
+    const arrivalDate =
+      selectedVariant?.date && selectedVariant?.nights != null
+        ? (() => {
+            const d = new Date(selectedVariant.date);
+            d.setDate(d.getDate() + selectedVariant.nights);
+            return d.toISOString().split("T")[0];
+          })()
+        : null;
+
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -77,15 +89,19 @@ function BookingFormContent() {
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
-          travelDate: formData.travelDate,
-          adults: formData.adults,
-          children: formData.children,
+          travelDate: travelDateFromTour,
+          adults: String(adultsFromTour),
+          children: String(childrenFromTour),
           specialRequests: formData.specialRequests || undefined,
           tourId: tourId ?? undefined,
           tourName: tour?.name ?? undefined,
           variantId: selectedVariant?.id ?? variantId ?? undefined,
           price: totalPriceToSend ? Math.round(totalPriceToSend) : undefined,
           currency: currency ?? undefined,
+          nights: selectedVariant?.nights ?? undefined,
+          departureDate: departureDate ?? undefined,
+          arrivalDate: arrivalDate ?? undefined,
+          operatorName: selectedVariant?.operator ?? undefined,
         }),
       });
 
@@ -103,6 +119,9 @@ function BookingFormContent() {
         "bookingData",
         JSON.stringify({
           ...formData,
+          travelDate: travelDateFromTour,
+          adults: adultsFromTour,
+          children: childrenFromTour,
           tourName: tour?.name,
           tourId,
           variantId: selectedVariant?.id ?? variantId ?? null,
@@ -146,6 +165,32 @@ function BookingFormContent() {
 
   const formatMoney = (amount: number) =>
     `${Math.round(amount).toLocaleString("ru-RU")} ${currencySymbol}`;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const nightsLabel =
+    selectedVariant?.nights != null
+      ? `${selectedVariant.nights} ${selectedVariant.nights === 1 ? "ночь" : selectedVariant.nights < 5 ? "ночи" : "ночей"}`
+      : null;
+  const departureDateStr = selectedVariant?.date ? formatDate(selectedVariant.date) : null;
+  const arrivalDateStr =
+    selectedVariant?.date && selectedVariant?.nights != null
+      ? (() => {
+          const d = new Date(selectedVariant.date);
+          d.setDate(d.getDate() + selectedVariant.nights);
+          return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+        })()
+      : null;
+
+  const summaryAdults = selectedVariant?.adults ?? tour?.minGuests ?? 2;
+  const summaryChildren = selectedVariant?.children ?? 0;
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] py-8">
@@ -208,55 +253,6 @@ function BookingFormContent() {
                           setFormData({ ...formData, phone: e.target.value })
                         }
                         placeholder="+7 (777) 123-4567"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="travelDate">
-                        Дата поездки <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="travelDate"
-                        type="date"
-                        required
-                        value={formData.travelDate}
-                        onChange={(e) =>
-                          setFormData({ ...formData, travelDate: e.target.value })
-                        }
-                        min={new Date().toISOString().split("T")[0]}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="adults">
-                        Количество взрослых <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="adults"
-                        type="number"
-                        min={tour.minGuests}
-                        max={tour.maxGuests}
-                        required
-                        value={formData.adults}
-                        onChange={(e) =>
-                          setFormData({ ...formData, adults: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="children">Количество детей</Label>
-                      <Input
-                        id="children"
-                        type="number"
-                        min="0"
-                        max="10"
-                        value={formData.children}
-                        onChange={(e) =>
-                          setFormData({ ...formData, children: e.target.value })
-                        }
                       />
                     </div>
                   </div>
@@ -337,18 +333,37 @@ function BookingFormContent() {
                   <h3 className="font-semibold text-lg mb-2">{tour.name}</h3>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2" />
+                      <MapPin className="h-4 w-4 mr-2 shrink-0" />
                       {tour.city}, {tour.country}
                     </div>
+                    {nightsLabel != null && (
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2 shrink-0" />
+                        {nightsLabel}
+                      </div>
+                    )}
+                    {departureDateStr != null && (
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 shrink-0" />
+                        Вылет: {departureDateStr}
+                      </div>
+                    )}
+                    {arrivalDateStr != null && (
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 shrink-0" />
+                        Прилёт: {arrivalDateStr}
+                      </div>
+                    )}
+                    {!selectedVariant && (
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2 shrink-0" />
+                        {tour.duration}
+                      </div>
+                    )}
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {tour.duration}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-2" />
-                      {formData.adults} взрослых
-                      {parseInt(formData.children) > 0 &&
-                        `, ${formData.children} детей`}
+                      <Users className="h-4 w-4 mr-2 shrink-0" />
+                      {summaryAdults} взрослых
+                      {summaryChildren > 0 && `, ${summaryChildren} детей`}
                     </div>
                   </div>
                 </div>

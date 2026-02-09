@@ -6,7 +6,11 @@ export interface TourVariant {
   operatorId: number;
   date: string;
   nights: number;
+  adults?: number;
+  children?: number;
   meal?: string;
+  placement?: string;
+  roomType?: string;
   price: number;
   currency: string;
 }

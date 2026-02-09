@@ -155,7 +155,11 @@ function toVariant(t: TourvisorSearchTour): TourVariant {
     operatorId: t.operator?.id || 0,
     date: t.date || '',
     nights: t.nights || 0,
+    adults: t.adults ?? undefined,
+    children: t.childs ?? undefined,
     meal: t.meal?.russianName || t.meal?.name,
+    placement: t.placement || undefined,
+    roomType: t.roomType || undefined,
     price: t.price || 0,
     currency: t.currency || 'KZT',
   };

@@ -40,7 +40,7 @@ export const DEFAULT_BUDGET_MIN = 0;
 export const DEFAULT_BUDGET_MAX = 3_000_000;
 export const DEFAULT_ADULTS = 2;
 export const DEFAULT_CHILDREN = 0;
-export const DEFAULT_SORT: NonNullable<SearchParams["sortBy"]> = "rating";
+export const DEFAULT_SORT: NonNullable<SearchParams["sortBy"]> = "price-asc";
 export const DEFAULT_DEPARTURE_ID = Number(
   process.env.NEXT_PUBLIC_DEFAULT_DEPARTURE_ID || 27
 );
@@ -201,8 +201,6 @@ export function buildSearchParams(state: SearchQueryState): URLSearchParams {
 export function toServerSearchParams(state: SearchQueryState): SearchParams {
   return {
     country: state.country || undefined,
-    // NOTE: We intentionally do NOT send multi-resort selection to API yet.
-    // It is applied client-side.
     departureId: state.departureId ?? undefined,
     dateFrom: state.dateFrom || undefined,
     dateTo: state.dateTo || undefined,
@@ -210,8 +208,7 @@ export function toServerSearchParams(state: SearchQueryState): SearchParams {
     nightsTo: state.nightsTo ?? undefined,
     adults: state.adults,
     children: state.children,
-    // childrenAges is part of SearchParams, but Tourvisor trial endpoint rejected it earlier.
-    // Keep it out of server request for now; the URL still persists it.
+    childrenAges: state.childrenAges.length > 0 ? state.childrenAges : undefined,
     sortBy: undefined,
     minPrice: undefined,
     maxPrice: undefined,

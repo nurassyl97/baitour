@@ -280,7 +280,7 @@ function SearchResults() {
               <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
               <p className="text-muted-foreground">
                 Найдено {visibleTours.length}{" "}
-                {visibleTours.length === 1 ? "тур" : visibleTours.length < 5 ? "тура" : "туров"}
+                {visibleTours.length === 0 ? "туров" : visibleTours.length === 1 ? "тур" : visibleTours.length < 5 ? "тура" : "туров"}
               </p>
             </div>
 
@@ -361,9 +361,9 @@ function SearchResults() {
 
                 {!isLoading && !error && visibleTours.length === 0 && hasSearched && hasQuery && (
                   <div className="bg-[#FFFFFF] rounded-lg shadow p-12 text-center">
-                    <h3 className="text-2xl font-semibold mb-2">Туры не найдены</h3>
+                    <h3 className="text-2xl font-semibold mb-2">По заданным фильтрам туров не существует</h3>
                     <p className="text-muted-foreground mb-6">
-                      Попробуйте изменить фильтры или поищите другое направление
+                      Попробуйте изменить даты, направление или параметры поиска
                     </p>
                     <Button onClick={() => window.location.href = "/"}>
                       Вернуться на главную

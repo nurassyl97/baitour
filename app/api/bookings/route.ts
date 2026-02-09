@@ -13,6 +13,14 @@ type BookingBody = {
   variantId?: string | null;
   price?: number | null;
   currency?: string | null;
+  /** Количество ночей выбранного варианта */
+  nights?: number | null;
+  /** Дата вылета (выбранный вариант) */
+  departureDate?: string | null;
+  /** Дата прилёта (вылет + ночи) */
+  arrivalDate?: string | null;
+  /** Название туроператора выбранного варианта */
+  operatorName?: string | null;
 };
 
 function validateBody(body: unknown): body is BookingBody {
@@ -54,12 +62,23 @@ export async function POST(request: Request) {
     const tourName = body.tourName ?? "Тур";
     const title = `Заявка на тур: ${tourName}`;
 
+    const formatDateForComment = (isoOrLocal: string) => {
+      const match = isoOrLocal.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) return `${match[3]}.${match[2]}.${match[1]}`;
+      return isoOrLocal;
+    };
+
     const commentsParts: string[] = [
-      `Дата поездки: ${body.travelDate}`,
+      body.tourName ? `Тур: ${body.tourName}` : "",
+      body.operatorName ? `Туроператор: ${body.operatorName}` : "",
+      body.price != null ? `Цена: ${body.price} ${body.currency ?? "KZT"}` : "",
+      body.nights != null ? `Ночей: ${body.nights}` : "",
+      body.departureDate ? `Дата вылета: ${formatDateForComment(body.departureDate)}` : "",
+      body.arrivalDate ? `Дата прилёта: ${formatDateForComment(body.arrivalDate)}` : "",
+      `Дата поездки (в форме): ${body.travelDate}`,
       `Взрослых: ${adults}, детей: ${children}`,
       body.tourId ? `Тур ID: ${body.tourId}` : "",
       body.variantId ? `Вариант ID: ${body.variantId}` : "",
-      body.price != null ? `Цена: ${body.price} ${body.currency ?? "KZT"}` : "",
       body.specialRequests?.trim() ? `Пожелания: ${body.specialRequests.trim()}` : "",
     ].filter(Boolean);
 

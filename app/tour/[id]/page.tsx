@@ -60,6 +60,19 @@ export default function TourPage({ params }: TourPageProps) {
           if (foundTour) {
             setTour(foundTour)
             setIsLoading(false)
+            // Подгружаем все фото отеля с API (в поиске только одно превью)
+            fetch(`/api/hotels/${cleanId}/images`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((data: { images?: string[] } | null) => {
+                if (data?.images?.length) {
+                  setTour((prev) =>
+                    prev && prev.id === cleanId
+                      ? { ...prev, images: data.images!, image: data.images[0] }
+                      : prev
+                  )
+                }
+              })
+              .catch(() => {})
             return
           }
         }
@@ -74,6 +87,20 @@ export default function TourPage({ params }: TourPageProps) {
         }
         const data = await response.json()
         setTour(data)
+        if (data?.images?.length <= 1) {
+          fetch(`/api/hotels/${cleanId}/images`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((imgData: { images?: string[] } | null) => {
+              if (imgData?.images?.length) {
+                setTour((prev) =>
+                  prev && prev.id === cleanId
+                    ? { ...prev, images: imgData.images!, image: imgData.images[0] }
+                    : prev
+                )
+              }
+            })
+            .catch(() => {})
+        }
       } catch {
         notFound()
       } finally {
@@ -92,17 +119,16 @@ export default function TourPage({ params }: TourPageProps) {
     return variants.reduce((min, v) => (v.price < min.price ? v : min), variants[0])
   }, [tour, selectedVariantId])
 
-  /** Группируем по ночам, показываем только самый дешёвый вариант для каждой длительности (без туроператоров) */
+  /** Все варианты: упорядочены по возрастанию цены, при равной цене — по дате. */
   const displayVariants = useMemo(() => {
     const variants = tour?.variants
     if (!variants?.length) return []
-    const byNights = new Map<number, typeof variants[0]>()
-    for (const v of variants) {
-      const nights = v.nights ?? 0
-      const existing = byNights.get(nights)
-      if (!existing || v.price < existing.price) byNights.set(nights, v)
-    }
-    return Array.from(byNights.values()).sort((a, b) => (a.nights ?? 0) - (b.nights ?? 0))
+    return [...variants].sort((a, b) => {
+      if (a.price !== b.price) return a.price - b.price
+      const dateA = a.date || ''
+      const dateB = b.date || ''
+      return dateA.localeCompare(dateB)
+    })
   }, [tour])
 
   const copyLink = () => {
@@ -242,7 +268,11 @@ export default function TourPage({ params }: TourPageProps) {
             {activeTab === "tours" && (
               <div className="space-y-4">
                 {displayVariants.length > 0 ? (
-                  displayVariants.map((variant, index) => {
+                  <>
+                    <p className="text-sm text-gray-500">
+                      Всего {displayVariants.length} {displayVariants.length === 1 ? "вариант" : displayVariants.length < 5 ? "варианта" : "вариантов"} от разных туроператоров, с разным питанием и размещением.
+                    </p>
+                    {displayVariants.map((variant, index) => {
                     const dateFrom = variant.date
                       ? new Date(variant.date)
                       : null
@@ -272,10 +302,10 @@ export default function TourPage({ params }: TourPageProps) {
                         className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
                       >
                         <div className="flex flex-col gap-4 md:flex-row md:items-stretch md:gap-0">
-                          {/* Left: dates + occupancy (туроператор скрыт) */}
+                          {/* Слева: даты, туроператор, гости */}
                           <div className="min-w-0 flex-1 space-y-2">
                             <h3 className="font-semibold text-gray-900">
-                              Тур
+                              Турпакет
                             </h3>
                             <div className="flex flex-col gap-1 text-sm text-gray-500">
                               <span className="flex items-center gap-2">
@@ -284,22 +314,30 @@ export default function TourPage({ params }: TourPageProps) {
                               </span>
                               <span className="flex items-center gap-2">
                                 <BedDouble className="size-4 shrink-0 text-gray-400" />
-                                2 взр
+                                {(() => {
+                                  const a = variant.adults ?? 2;
+                                  const c = variant.children ?? 0;
+                                  if (c > 0) {
+                                    const childWord = c === 1 ? "реб." : c < 5 ? "реб." : "дет.";
+                                    return `${a} взр, ${c} ${childWord}`;
+                                  }
+                                  return `${a} взр`;
+                                })()}
                               </span>
                             </div>
                           </div>
-                          {/* Middle: size, meal (туроператор скрыт) */}
+                          {/* По центру: размещение (комната), питание */}
                           <div className="flex flex-1 flex-col gap-1 border-gray-200 pl-0 text-sm text-gray-500 md:border-l md:pl-5">
                             <span className="flex items-center gap-2">
                               <Building2 className="size-4 shrink-0 text-gray-400" />
-                              Размер: —
+                              Размещение: {variant.roomType || variant.placement || "—"}
                             </span>
                             <span className="flex items-center gap-2">
                               <UtensilsCrossed className="size-4 shrink-0 text-gray-400" />
-                              {variant.meal || "Только завтрак"}
+                              {variant.meal || "Без питания"}
                             </span>
                           </div>
-                          {/* Right: price + button (без «от других операторов») */}
+                          {/* Справа: цена и кнопка выбора */}
                           <div className="flex shrink-0 flex-col items-end justify-between gap-3 border-gray-200 pl-0 md:border-l md:pl-5">
                             <div className="text-right">
                               <div className="text-xl font-bold text-gray-900">
@@ -309,16 +347,22 @@ export default function TourPage({ params }: TourPageProps) {
                             </div>
                             <Button
                               size="sm"
-                              className="w-full shrink-0 bg-[#22a7f0] px-4 py-2 font-medium text-white hover:bg-[#1b8fd8] md:w-auto"
+                              variant={selectedVariant?.id === variant.id ? "default" : "outline"}
+                              className={
+                                selectedVariant?.id === variant.id
+                                  ? "w-full shrink-0 bg-[#22a7f0] px-4 py-2 font-medium text-white hover:bg-[#1b8fd8] md:w-auto"
+                                  : "w-full shrink-0 md:w-auto"
+                              }
                               onClick={() => setSelectedVariantId(variant.id)}
                             >
-                              Выбрано
+                              {selectedVariant?.id === variant.id ? "Выбрано" : "Выбрать"}
                             </Button>
                           </div>
                         </div>
                       </div>
                     )
-                  })
+                  })}
+                  </>
                 ) : (
                   <Card className="border-amber-200 bg-amber-50/50">
                     <CardContent className="py-6 text-center text-gray-700">

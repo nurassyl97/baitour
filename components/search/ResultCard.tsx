@@ -20,17 +20,31 @@ function deriveStars(tour: Tour): number {
   return Math.max(1, Math.min(5, n))
 }
 
+function uniqueImages(images: string[], max = 20): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const url of images) {
+    if (url && !seen.has(url)) {
+      seen.add(url)
+      out.push(url)
+      if (out.length >= max) break
+    }
+  }
+  return out
+}
+
 export function ResultCard({ tour }: { tour: Tour }) {
   const hotelName = getHotelName(tour)
   const stars = deriveStars(tour)
   const priceSymbol = tour.currency === "KZT" ? "₸" : tour.currency || "₸"
+  const images = uniqueImages(tour.images?.length ? tour.images : [tour.image].filter(Boolean))
 
   return (
     <div className="group rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-0">
         <div className="relative block aspect-[4/3] md:aspect-auto md:h-full overflow-hidden rounded-t-[var(--radius)] md:rounded-l-[var(--radius)] md:rounded-tr-none">
           <HotelImageSlideshow
-            images={(tour.images?.length ? tour.images : [tour.image]).slice(0, 8)}
+            images={images}
             alt={hotelName}
             tourId={tour.id}
             className="h-full w-full overflow-hidden rounded-[12px]"

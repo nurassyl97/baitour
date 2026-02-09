@@ -144,10 +144,14 @@ async function convertSearchParamsToTourvisor(params: SearchParams): Promise<Tou
     tourvisorParams.meal = params.meal;
   }
 
-  // Children
+  // Children — передаём в API, иначе поиск идёт только по взрослым
   if (params.children && params.children > 0) {
     tourvisorParams.children = params.children;
-    // Note: We'd need childrenAges if we want to specify ages
+    if (params.childrenAges && params.childrenAges.length >= params.children) {
+      tourvisorParams.childrenAges = params.childrenAges.slice(0, params.children);
+    } else {
+      tourvisorParams.childrenAges = Array.from({ length: params.children }, () => 5);
+    }
   }
 
   // Price range
@@ -208,13 +212,14 @@ export async function fetchHotelImages(hotelId: number): Promise<HotelImages> {
 }
 
 const HOTEL_PHOTOS_CONCURRENCY = 5;
-/** Limit how many hotels we enrich with full gallery so first response is faster (mobile). Rest keep search preview. */
-const ENRICH_PHOTOS_LIMIT = 25;
+/** Сколько отелей обогащаем полной галереей в результатах поиска (ограничение из‑за лимитов Tourvisor API). */
+const ENRICH_PHOTOS_LIMIT = 20;
 
 /**
  * Enrich tours with hotel photos from hotel description API.
  * Search API only provides one picturelink (preview); full gallery comes from GET /hotels/{id}.
- * We enrich only the first ENRICH_PHOTOS_LIMIT hotels to return results faster on mobile.
+ * Чтобы не ловить 429 Too Many Requests от Tourvisor, обогащаем только первые ENRICH_PHOTOS_LIMIT отелей.
+ * Полная галерея для конкретного отеля дополнительно подгружается на странице тура.
  */
 async function enrichToursWithHotelPhotos(tours: Tour[]): Promise<Tour[]> {
   const uniqueIds = [...new Set(tours.map((t) => parseInt(t.id, 10)).filter(Number.isFinite))];
@@ -365,8 +370,20 @@ export async function searchTours(
 
     console.log('Tourvisor search params:', tourvisorParams);
 
-    // Start the search
-    const searchId = await tourvisorApi.startTourSearch(tourvisorParams);
+    let searchId: string;
+    try {
+      searchId = await tourvisorApi.startTourSearch(tourvisorParams);
+    } catch (firstError) {
+      const msg = firstError instanceof Error ? firstError.message : String(firstError);
+      if (params.children && params.children > 0 && msg.includes('400')) {
+        console.warn('Search with children returned 400, retrying without children parameter');
+        const paramsWithoutChildren = { ...params, children: 0 };
+        const tourvisorParamsRetry = await convertSearchParamsToTourvisor(paramsWithoutChildren);
+        searchId = await tourvisorApi.startTourSearch(tourvisorParamsRetry);
+      } else {
+        throw firstError;
+      }
+    }
     console.log('Search started with ID:', searchId);
 
     // Poll for results with progress callback
@@ -384,19 +401,20 @@ export async function searchTours(
     // Enrich with full photo gallery from hotel description API (GET /hotels/{id})
     const toursWithPhotos = await enrichToursWithHotelPhotos(tours);
 
-    // Apply client-side sorting if specified
-    if (params.sortBy) {
-      switch (params.sortBy) {
-        case 'price-asc':
-          toursWithPhotos.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-desc':
-          toursWithPhotos.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          toursWithPhotos.sort((a, b) => b.rating - a.rating);
-          break;
-      }
+    // Сортировка: по умолчанию по возрастанию цены
+    const sortBy = params.sortBy || 'price-asc';
+    switch (sortBy) {
+      case 'price-asc':
+        toursWithPhotos.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        toursWithPhotos.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        toursWithPhotos.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        toursWithPhotos.sort((a, b) => a.price - b.price);
     }
 
     return toursWithPhotos;
@@ -423,6 +441,10 @@ export interface BookingRequest {
   variantId?: string;
   price?: number;
   currency?: string;
+  nights?: number;
+  departureDate?: string;
+  arrivalDate?: string;
+  operatorName?: string;
 }
 
 export async function submitBooking(booking: BookingRequest): Promise<{

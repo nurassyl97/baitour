@@ -298,6 +298,13 @@ export async function startTourSearch(params: TourvisorSearchRequest): Promise<s
   queryParams.append('nightsTo', nightsTo.toString());
   console.log('Nights range being sent:', { nightsFrom, nightsTo });
   queryParams.append('adults', params.adults.toString());
+  // childs — массив возрастов детей (по доке API: https://api.tourvisor.ru/search/docs#tag/tour-search/operation/tour-search)
+  if (params.children !== undefined && params.children > 0) {
+    const ages = (params.childrenAges && params.childrenAges.length >= params.children)
+      ? params.childrenAges.slice(0, params.children)
+      : Array.from({ length: params.children }, () => 5);
+    ages.forEach((age) => queryParams.append('childs', String(Math.max(0, Math.min(17, age)))));
+  }
   queryParams.append('currency', params.currency);
   queryParams.append('onlyCharter', (params.onlyCharter || false).toString());
   

@@ -9,7 +9,6 @@ import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useMobile } from "@/lib/use-mobile"
-import { pluralRu } from "@/components/search/format"
 
 /* DESIGN STANDARDS (LOCKED) - Travel Date Range Calendar */
 
@@ -76,19 +75,14 @@ export function TravelDateCalendar({
         className
       )}
     >
-      {/* Header: 48px, flex space-between, icon + title left, nights right, mb-16px */}
-      <div className="flex h-12 items-center justify-between mb-4">
+      {/* Header: icon + title */}
+      <div className="flex h-12 items-center mb-4">
         <div className="flex items-center gap-2">
           <CalendarDays className="size-4 text-[#64748B]" aria-hidden />
           <span className="text-[16px] font-semibold leading-6 text-[#0F172A]">
             Выберите даты
           </span>
         </div>
-        <span className="text-[14px] font-medium text-[#64748B]">
-          {nights != null && nights > 0
-            ? `${nights} ${pluralRu(nights, "ночь", "ночи", "ночей")}`
-            : ""}
-        </span>
       </div>
 
       {/* DayPicker with spec classNames */}
