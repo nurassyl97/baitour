@@ -204,7 +204,6 @@ export default function TourPage({ params }: TourPageProps) {
             <TourHeroGallery
               images={images}
               alt={hotelName}
-              maxThumbnails={6}
             />
 
             {/* Tabs */}

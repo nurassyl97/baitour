@@ -6,18 +6,18 @@ import Image from "next/image"
 interface TourHeroGalleryProps {
   images: string[]
   alt: string
-  /** Max thumbnails to show (default 6) */
+  /** Max thumbnails to show; не задано — показывать все изображения из Tourvisor */
   maxThumbnails?: number
 }
 
 export function TourHeroGallery({
   images,
   alt,
-  maxThumbnails = 6,
+  maxThumbnails,
 }: TourHeroGalleryProps) {
   const [index, setIndex] = useState(0)
   const list = images.length ? images : []
-  const thumbnails = list.slice(0, maxThumbnails)
+  const thumbnails = maxThumbnails != null ? list.slice(0, maxThumbnails) : list
 
   if (list.length === 0) return null
 
