@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { searchTours } from '@/lib/api';
 import { SearchParams } from '@/lib/data';
 
+// Allow long-running search (Tourvisor polling can take 30–60s); avoid serverless timeout on mobile
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

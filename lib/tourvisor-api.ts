@@ -396,14 +396,12 @@ export async function pollSearchResults(
   onProgress?: (progress: number) => void
 ): Promise<TourvisorSearchHotel[]> {
   let attempts = 0;
-  let delay = 2000; // Start with 2 seconds (give search time to initialize)
+  let delay = 1500; // Start with 1.5s for faster first response (especially on mobile)
   const allTours: TourvisorSearchHotel[] = [];
 
   console.log(`Starting to poll search results for searchId: ${searchId}`);
-  
-  // Wait 3 seconds before first attempt (let search initialize)
-  console.log('Waiting 3 seconds for search to initialize...');
-  await sleep(3000);
+  // Short initial wait so first poll is sooner (mobile-friendly)
+  await sleep(1500);
 
   while (attempts < maxAttempts) {
     try {

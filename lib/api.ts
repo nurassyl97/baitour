@@ -208,19 +208,23 @@ export async function fetchHotelImages(hotelId: number): Promise<HotelImages> {
 }
 
 const HOTEL_PHOTOS_CONCURRENCY = 5;
+/** Limit how many hotels we enrich with full gallery so first response is faster (mobile). Rest keep search preview. */
+const ENRICH_PHOTOS_LIMIT = 25;
 
 /**
  * Enrich tours with hotel photos from hotel description API.
  * Search API only provides one picturelink (preview); full gallery comes from GET /hotels/{id}.
+ * We enrich only the first ENRICH_PHOTOS_LIMIT hotels to return results faster on mobile.
  */
 async function enrichToursWithHotelPhotos(tours: Tour[]): Promise<Tour[]> {
   const uniqueIds = [...new Set(tours.map((t) => parseInt(t.id, 10)).filter(Number.isFinite))];
   if (uniqueIds.length === 0) return tours;
 
+  const idsToEnrich = uniqueIds.slice(0, ENRICH_PHOTOS_LIMIT);
   const map = new Map<number, string[]>();
 
-  for (let i = 0; i < uniqueIds.length; i += HOTEL_PHOTOS_CONCURRENCY) {
-    const chunk = uniqueIds.slice(i, i + HOTEL_PHOTOS_CONCURRENCY);
+  for (let i = 0; i < idsToEnrich.length; i += HOTEL_PHOTOS_CONCURRENCY) {
+    const chunk = idsToEnrich.slice(i, i + HOTEL_PHOTOS_CONCURRENCY);
     const results = await Promise.allSettled(chunk.map(fetchHotelImages));
     for (const result of results) {
       if (result.status === 'fulfilled' && result.value.images.length > 0) {

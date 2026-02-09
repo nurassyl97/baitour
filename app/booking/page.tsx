@@ -66,7 +66,7 @@ function BookingFormContent() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const unitPrice = selectedVariant?.price ?? tour?.price ?? 0;
+    const totalPriceToSend = selectedVariant?.price ?? tour?.price ?? 0;
     const currency = selectedVariant?.currency ?? tour?.currency ?? "KZT";
 
     try {
@@ -84,7 +84,7 @@ function BookingFormContent() {
           tourId: tourId ?? undefined,
           tourName: tour?.name ?? undefined,
           variantId: selectedVariant?.id ?? variantId ?? undefined,
-          price: unitPrice ? Math.round(unitPrice) : undefined,
+          price: totalPriceToSend ? Math.round(totalPriceToSend) : undefined,
           currency: currency ?? undefined,
         }),
       });
@@ -139,14 +139,13 @@ function BookingFormContent() {
     );
   }
 
-  const unitPrice = selectedVariant?.price ?? tour.price;
+  // Цена выбранного варианта — уже итоговая за тур (за тех гостей, с которыми искали). Не умножаем на кол-во.
+  const selectedTotalPrice = selectedVariant?.price ?? tour.price;
   const currency = selectedVariant?.currency ?? tour.currency ?? "KZT";
   const currencySymbol = currency === "KZT" ? "₸" : currency;
 
   const formatMoney = (amount: number) =>
     `${Math.round(amount).toLocaleString("ru-RU")} ${currencySymbol}`;
-  const totalPrice =
-    unitPrice * (parseInt(formData.adults) + parseInt(formData.children) * 0.7);
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] py-8">
@@ -356,20 +355,12 @@ function BookingFormContent() {
 
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span>Взрослые ({formData.adults})</span>
-                    <span>{formatMoney(unitPrice * parseInt(formData.adults))}</span>
+                    <span>Стоимость тура (выбранный вариант)</span>
+                    <span>{formatMoney(selectedTotalPrice)}</span>
                   </div>
-                  {parseInt(formData.children) > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span>Дети ({formData.children})</span>
-                      <span>
-                        {formatMoney(unitPrice * 0.7 * parseInt(formData.children))}
-                      </span>
-                    </div>
-                  )}
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Итого</span>
-                    <span>{formatMoney(totalPrice)}</span>
+                    <span>{formatMoney(selectedTotalPrice)}</span>
                   </div>
                 </div>
 

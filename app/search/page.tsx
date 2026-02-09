@@ -103,6 +103,8 @@ function SearchResults() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   useEffect(() => {
+    const SEARCH_TIMEOUT_MS = 75000; // 75s — mobile/slow networks need longer than default
+
     async function performSearch() {
       const snapshot = stateRef.current;
 
@@ -117,6 +119,9 @@ function SearchResults() {
 
       setIsLoading(true);
       setError(null);
+
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), SEARCH_TIMEOUT_MS);
 
       // Ensure default dates if user hasn't selected them yet
       const today = new Date();
@@ -138,15 +143,17 @@ function SearchResults() {
       try {
         console.log('Calling search API with params:', params);
         console.log('Date range:', { dateFrom: params.dateFrom, dateTo: params.dateTo });
-        
-        // Call our API route instead of searchTours directly
+
         const response = await fetch('/api/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(params),
+          signal: abortController.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -155,8 +162,7 @@ function SearchResults() {
 
         const data = await response.json();
         setToursRaw(data.tours || []);
-        
-        // Save search results to localStorage for detail pages
+
         try {
           if (data.tours && data.tours.length > 0) {
             localStorage.setItem('tourSearchResults', JSON.stringify(data.tours));
@@ -165,17 +171,19 @@ function SearchResults() {
           console.warn('Failed to save search results:', storageError);
         }
       } catch (err: unknown) {
+        clearTimeout(timeoutId);
         const message = err instanceof Error ? err.message : String(err);
-        // In dev Next can show an overlay for console.error; this is a user-facing error state already.
         console.warn('Search error:', message);
-        
-        // Handle rate limiting with a user-friendly message
+
+        if (err instanceof Error && err.name === 'AbortError') {
+          setError('Поиск занял слишком много времени. Проверьте интернет и попробуйте снова.');
+          return;
+        }
+
         if (message.includes('429') || message.includes('Too Many Requests')) {
-          const waitTime = 60; // Wait 60 seconds for trial API
+          const waitTime = 60;
           setError(`Слишком много запросов к API (пробная версия). Пожалуйста, подождите ${waitTime} секунд и попробуйте снова.`);
           setRetryAfter(waitTime);
-          
-          // Countdown timer
           let remaining = waitTime;
           const countdown = setInterval(() => {
             remaining--;
@@ -324,7 +332,7 @@ function SearchResults() {
                     <LoadingSpinner size="lg" />
                     <p className="mt-4 text-lg font-medium">Ищем туры у операторов...</p>
                     <p className="text-sm text-gray-500 mt-2">
-                      Это может занять 10-30 секунд
+                      Обычно 15–45 сек. На мобильном — не закрывайте страницу.
                     </p>
                   </div>
                 )}
