@@ -64,10 +64,11 @@ export default function TourPage({ params }: TourPageProps) {
             fetch(`/api/hotels/${cleanId}/images`)
               .then((res) => (res.ok ? res.json() : null))
               .then((data: { images?: string[] } | null) => {
-                if (data?.images?.length) {
+                const images = data?.images
+                if (images && images.length) {
                   setTour((prev) =>
                     prev && prev.id === cleanId
-                      ? { ...prev, images: data.images!, image: data.images[0] }
+                      ? { ...prev, images, image: images[0] }
                       : prev
                   )
                 }
@@ -87,14 +88,15 @@ export default function TourPage({ params }: TourPageProps) {
         }
         const data = await response.json()
         setTour(data)
-        if (data?.images?.length <= 1) {
+        if (!data?.images || data.images.length <= 1) {
           fetch(`/api/hotels/${cleanId}/images`)
             .then((res) => (res.ok ? res.json() : null))
             .then((imgData: { images?: string[] } | null) => {
-              if (imgData?.images?.length) {
+              const images = imgData?.images
+              if (images && images.length) {
                 setTour((prev) =>
                   prev && prev.id === cleanId
-                    ? { ...prev, images: imgData.images!, image: imgData.images[0] }
+                    ? { ...prev, images, image: images[0] }
                     : prev
                 )
               }
